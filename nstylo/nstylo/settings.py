@@ -17,9 +17,11 @@ from django.contrib import admin
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/database/"))
+RESULTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/results/"))
 if "RU-nstylo\\writable" in WRITABLE_DIR:
     # Need another string
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/database/"))
+    RESULTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/results/"))
 
 APP_PREFIX = "/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
@@ -62,7 +64,7 @@ INSTALLED_APPS = [
     'nstylo.stylometry',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

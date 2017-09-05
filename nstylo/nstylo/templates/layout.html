@@ -11,9 +11,10 @@
     <script src="{% static 'stylometry/scripts/jquery-1.10.2.js' %}"></script>
     <script src="{% static 'stylometry/scripts/bootstrap.js' %}"></script>
     <script src="{% static 'stylometry/scripts/respond.js' %}"></script>
-    <script src="{% static 'stylometry/scripts/crpstudio.svg.js' %}"></script>
-    <script src="{% static 'stylometry/scripts/cesar.js' %}"></script>
+    <script src="{% static 'stylometry/scripts/nstylo.js' %}"></script>
+    <script src="{% static 'stylometry/scripts/prototype.js' %}"></script>
 {% block scripts %}{% endblock %}
+{% block header_content %} Content will appear here! {% endblock %}
 </head>
 
 <body>
@@ -24,11 +25,14 @@
 
     <div class="container-fluid body-content">
 
-{% block content %}{% endblock %}
+{% block content %}<div id="content"></div>{% endblock %}
 
         <hr/>
         <footer>
-            <p>&copy; {{ year }} - Cesar</p>
+            <div id="footer">
+            {% block footerContent %}{% endblock %}
+            </div>
+            <p>&copy; {{ year }} - Nstylo</p>
         </footer>
     </div>
 

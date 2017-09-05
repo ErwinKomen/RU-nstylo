@@ -54,7 +54,9 @@
     <Folder Include="nstylo\stylometry\static\stylometry\" />
     <Folder Include="nstylo\stylometry\static\stylometry\content\" />
     <Folder Include="nstylo\stylometry\static\stylometry\fonts\" />
+    <Folder Include="nstylo\stylometry\static\stylometry\results\" />
     <Folder Include="nstylo\stylometry\static\stylometry\scripts\" />
+    <Folder Include="nstylo\stylometry\templates\stylometry\" />
     <Folder Include="nstylo\templates\" />
     <Folder Include="nstylo\stylometry\" />
     <Folder Include="nstylo\stylometry\migrations\" />
@@ -82,9 +84,11 @@
     <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.unobtrusive.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\modernizr-2.6.2.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\prototype.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.min.js" />
-    <Content Include="nstylo\stylometry\templates\index.html" />
+    <Content Include="nstylo\stylometry\templates\stylometry\index.html" />
+    <Content Include="nstylo\stylometry\templates\stylometry\sites_list.html" />
     <Content Include="nstylo\templates\about.html" />
     <Content Include="nstylo\templates\contact.html" />
     <Content Include="nstylo\templates\index.html" />

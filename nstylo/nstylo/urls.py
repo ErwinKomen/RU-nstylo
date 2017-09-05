@@ -32,10 +32,13 @@ pfx = APP_PREFIX
 urlpatterns = [
     # Examples:
     url(r'^$', nstylo.stylometry.views.home, name='home'),
+    url(r'^index$', nstylo.stylometry.views.index, name='index'),
     url(r'^contact$', nstylo.stylometry.views.contact, name='contact'),
     url(r'^about', nstylo.stylometry.views.about, name='about'),
     url(r'^more', nstylo.stylometry.views.more, name='more'),
     url(r'^nlogin', nstylo.stylometry.views.nlogin, name='nlogin'),
+    url(r'^getSites.*$', nstylo.stylometry.views.getSites, name='sites'),
+    url(r'^doFDC', nstylo.stylometry.views.doFDC, name='fdc'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^login/$',
         django.contrib.auth.views.login,
@@ -60,5 +63,5 @@ urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 ]
