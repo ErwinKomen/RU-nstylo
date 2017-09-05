@@ -20,12 +20,13 @@ from datetime import datetime
 from time import sleep
 import random, os
 
-from nstylo.settings import APP_PREFIX, RESULTS_DIR
+from nstylo.settings import APP_PREFIX, RESULTS_DIR, STATIC_ROOT
 from nstylo.stylometry.models import *
 from nstylo.stylometry.forms import *
 
 # resultDir = RESULTS_DIR
-resultDir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "static/stylometry/results/"))
+# resultDir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "static/stylometry/results/"))
+resultDir = os.path.abspath(os.path.join(STATIC_ROOT, "results/"))
 rFuncStr = """
     renderer <- function(filename, title, units) {
         dat <- rnorm(1000)
@@ -143,6 +144,7 @@ def doFDC(request):
     filename = "%d_%s" % (random.randint(1000, 9999), "boxplot.png")
     R = getRConnection()
     resultFile = os.path.abspath(os.path.join(resultDir, filename))
-    # R.renderer(resultDir + filename, "Random data for site %s (%s)" % (siteName, units), units)
     R.renderer(resultFile, "Random data for site %s (%s)" % (siteName, units), units)
-    return HttpResponse('<img src="/static/stylometry/results/' + filename + '" />')
+    # return HttpResponse('<img src="/static/stylometry/results/' + filename + '" />')
+    return HttpResponse('<img src="/static/results/' + filename + '" />')
+
