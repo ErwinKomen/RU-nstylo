@@ -1,0 +1,36 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+    <h1>NSTYLO</h1>
+    <p class="lead">The RU-nstylo web application is a Django/Python based web interface to run R-stylo using a local version of 'rserve'.</p>
+    <p><a href="{% url 'more' %}" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>Getting started</h2>
+        <p>
+            The RU-nstylo application has been designed by the Technical Service Group of the Humanities Lab at the Radboud University Nijmegen.
+          The application is only accessible to those who have received an invitation.
+        </p>
+        <p>Pfx={{pfx}}</p>
+        <p>site_url={{site_url}}</p>
+        <p>
+          {% if user.is_authenticated %}
+          (See the <b>Extra</b> menu for logout and other options)
+          {% else %}
+          <a class="btn btn-default" href="{% url 'login' %}"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>Log in</a>
+          {% endif %}
+        </p>
+    </div>
+    <div class="col-md-6">
+        <h2>Define RU-nstylo items</h2>
+        <p> (Explanation follows)
+        </p>
+        <p><a class="btn btn-default" href="mailto:e.komen@let.ru.nl">Request assistance &raquo;</a></p>
+    </div>
+</div>
+
+{% endblock %}

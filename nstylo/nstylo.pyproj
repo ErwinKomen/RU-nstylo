@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <Name>nstylo</Name>
+    <RootNamespace>nstylo</RootNamespace>
+    <InterpreterId>{a8ffcb0d-4312-4082-9840-e1e7ff2d2eed}</InterpreterId>
+    <InterpreterVersion>3.5</InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>66f69f35-ce8e-4642-a45e-c129e90f85eb</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <ProjectTypeGuids>{5F0BE9CA-D677-4A4D-8806-6076C0FAAD37};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <StartupFile>manage.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <LaunchProvider>Django launcher</LaunchProvider>
+    <OutputPath>.</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="manage.py" />
+    <Compile Include="nstylo\stylometry\admin.py" />
+    <Compile Include="nstylo\stylometry\apps.py" />
+    <Compile Include="nstylo\stylometry\forms.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="nstylo\stylometry\migrations\__init__.py" />
+    <Compile Include="nstylo\stylometry\models.py" />
+    <Compile Include="nstylo\stylometry\tests.py" />
+    <Compile Include="nstylo\stylometry\views.py" />
+    <Compile Include="nstylo\stylometry\__init__.py" />
+    <Compile Include="nstylo\utils.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="nstylo\__init__.py" />
+    <Compile Include="nstylo\settings.py" />
+    <Compile Include="nstylo\urls.py" />
+    <Compile Include="nstylo\wsgi.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="nstylo\" />
+    <Folder Include="nstylo\stylometry\static\" />
+    <Folder Include="nstylo\stylometry\static\stylometry\" />
+    <Folder Include="nstylo\stylometry\static\stylometry\content\" />
+    <Folder Include="nstylo\stylometry\static\stylometry\fonts\" />
+    <Folder Include="nstylo\stylometry\static\stylometry\scripts\" />
+    <Folder Include="nstylo\templates\" />
+    <Folder Include="nstylo\stylometry\" />
+    <Folder Include="nstylo\stylometry\migrations\" />
+    <Folder Include="nstylo\stylometry\templates\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.css" />
+    <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.min.css" />
+    <Content Include="nstylo\stylometry\static\stylometry\content\site.css" />
+    <Content Include="nstylo\stylometry\static\stylometry\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="nstylo\stylometry\static\stylometry\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="nstylo\stylometry\static\stylometry\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="nstylo\stylometry\static\stylometry\fonts\glyphicons-halflings-regular.woff" />
+    <None Include="nstylo\stylometry\static\stylometry\scripts\_references.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\bootstrap.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\bootstrap.min.js" />
+    <None Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate-vsdoc.js" />
+    <None Include="nstylo\stylometry\static\stylometry\scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\nstylo.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery-1.10.2.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery-1.10.2.min.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery-1.10.2.min.map" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.min.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\modernizr-2.6.2.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.min.js" />
+    <Content Include="nstylo\stylometry\templates\index.html" />
+    <Content Include="nstylo\templates\about.html" />
+    <Content Include="nstylo\templates\contact.html" />
+    <Content Include="nstylo\templates\index.html" />
+    <Content Include="nstylo\templates\layout.html" />
+    <Content Include="nstylo\templates\login.html" />
+    <Content Include="nstylo\templates\loginpartial.html" />
+    <Content Include="nstylo\templates\more.html" />
+    <Content Include="nstylo\templates\nlogin.html" />
+    <Content Include="nstylo\templates\topnav.html" />
+    <Content Include="requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.mht">
+      <SubType>WebBrowser</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="..\..\..\..\..\env\nstylo\">
+      <Id>{a8ffcb0d-4312-4082-9840-e1e7ff2d2eed}</Id>
+      <BaseInterpreter>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</BaseInterpreter>
+      <Version>3.5</Version>
+      <Description>nstylo (Python 3.5)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <LibraryPath>Lib\</LibraryPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Django.targets" />
+  <!-- Specify pre- and post-build commands in the BeforeBuild and 
+       AfterBuild targets below. -->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <AutoAssignPort>True</AutoAssignPort>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
