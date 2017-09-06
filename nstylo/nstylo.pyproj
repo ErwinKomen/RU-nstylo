@@ -6,6 +6,7 @@
     <RootNamespace>nstylo</RootNamespace>
     <InterpreterId>{a8ffcb0d-4312-4082-9840-e1e7ff2d2eed}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
+    <WebBrowserPort>6401</WebBrowserPort>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -17,7 +18,7 @@
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
-    <LaunchProvider>Django launcher</LaunchProvider>
+    <LaunchProvider>Web launcher</LaunchProvider>
     <OutputPath>.</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -30,6 +31,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="manage.py" />
+    <Compile Include="nstylo\services.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="nstylo\stylometry\admin.py" />
     <Compile Include="nstylo\stylometry\apps.py" />
     <Compile Include="nstylo\stylometry\forms.py">
@@ -87,7 +91,8 @@
     <Content Include="nstylo\stylometry\static\stylometry\scripts\prototype.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.min.js" />
-    <Content Include="nstylo\stylometry\templates\stylometry\index.html" />
+    <Content Include="nstylo\stylometry\templates\stylometry\demo.html" />
+    <Content Include="nstylo\stylometry\templates\stylometry\fdc_result.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\sites_list.html" />
     <Content Include="nstylo\templates\about.html" />
     <Content Include="nstylo\templates\contact.html" />

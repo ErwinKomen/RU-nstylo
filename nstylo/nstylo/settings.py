@@ -24,9 +24,11 @@ if "RU-nstylo\\writable" in WRITABLE_DIR:
     RESULTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/results/"))
 
 APP_PREFIX = "/"
+STATICDIR = "/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
     APP_PREFIX = ""
     admin.site.site_url = '/'
+    STATICDIR = "/Data Files/vs2010/projects/RU-nstylo/nstylo/nstylo/static"
 elif "/var/www" in WRITABLE_DIR:
     # New configuration of http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab
     APP_PREFIX = "nlab/"
@@ -144,7 +146,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 if ("/var/www" in WRITABLE_DIR):
     STATIC_URL = "/" + APP_PREFIX + "static/"
+    MEDIA_URL = "/" + APP_PREFIX + "media/"
 
 STATIC_ROOT = os.path.abspath(os.path.join("/", posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))))
+MEDIA_ROOT = os.path.abspath(os.path.join("/", posixpath.join(*(BASE_DIR.split(os.path.sep) + ['media']))))
+
+
+        
+STATICFILES_DIRS = [
+    STATICDIR
+]
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
