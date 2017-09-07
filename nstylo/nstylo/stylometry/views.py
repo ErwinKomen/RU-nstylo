@@ -28,6 +28,7 @@ import json
 from nstylo.settings import APP_PREFIX, RESULTS_DIR, STATIC_ROOT, MEDIA_ROOT
 from nstylo.stylometry.models import *
 from nstylo.stylometry.forms import *
+from nstylo.utils import ErrHandle
 
 conn = None
 
@@ -183,25 +184,36 @@ def doFDC(request):
 class NlabService(View):
     # Initialisations
     arErr = []              # Array of errors
+    oErr = ErrHandle()
+    step = "0"
 
     data = {'status': 'ok', 'html': 'nlabservice is aan het werk'}       # Create data to be returned    
 
     def post(self, request):
         """ The POST option should be used mostly"""
 
-        # A POST request is the only possible way to access our NLAB services
-        params = request.POST
-        sList = params['nstylo-freqlist']
-        if sList == "":
-            list = {}
-        else:
-            list = json.loads(sList)
+        try:
+            # A POST request is the only possible way to access our NLAB services
+            self.oErr.Status("NlabService - POST 1")
+            params = request.POST
+            self.oErr.Status("NlabService - POST 2")
+            sList = params['nstylo-freqlist']
+            self.oErr.Status("NlabService - POST 3")
+            if sList == "":
+                list = {}
+            else:
+                list = json.loads(sList)
 
-        # Process the data in the LIST
-        self.data['html'] = self.process_data(list)
+            self.oErr.Status("NlabService - POST 4")
+            # Process the data in the LIST
+            self.data['html'] = self.process_data(list)
+            self.oErr.Status("NlabService - POST 5\n{}".format(self.data['html']))
+        except:
+            self.data['html'] = "an error has occurred in NlabService(View) at step {}".format(self.step)
 
         # Figure out what we are going to return
         back = json.dumps(self.data)
+        self.oErr.Status("NlabService - POST 6")
 
         # return JsonResponse(self.data)
         return HttpResponse(back, "application/json")
@@ -209,8 +221,9 @@ class NlabService(View):
     def get(self, request):
         """The GET option is used in some instances"""
 
+        self.oErr.Status("NlabService - GET")
         get = request.GET
-        sList = get['list']
+        sList = get['nstylo-freqlist']
         if sList == "":
             list = {}
         else:
