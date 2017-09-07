@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^getSites.*$', nstylo.stylometry.views.getSites, name='sites'),
     url(r'^doFDC', nstylo.stylometry.views.doFDC, name='fdc'),
     url(r'^freq', nstylo.stylometry.views.NlabTest.as_view(), name='freq'),
+    url(r'^freq2', nstylo.stylometry.views.NlabTest.as_view(), name='freq2'),
     url(r'^freqtst', nstylo.stylometry.views.freq, name='freqtst'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^login/$',

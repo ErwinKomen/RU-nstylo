@@ -7,6 +7,8 @@
     <InterpreterId>{a8ffcb0d-4312-4082-9840-e1e7ff2d2eed}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
     <WebBrowserPort>6401</WebBrowserPort>
+    <WebBrowserUrl>
+    </WebBrowserUrl>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

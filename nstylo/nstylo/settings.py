@@ -26,8 +26,8 @@ if "RU-nstylo\\writable" in WRITABLE_DIR:
 APP_PREFIX = "/"
 STATICDIR = "/"
 if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
-    APP_PREFIX = ""
-    admin.site.site_url = '/'
+    APP_PREFIX =  "nlab/"           # WAS:    ""
+    admin.site.site_url = '/nlab'   # WAS:    '/'
     STATICDIR = "/Data Files/vs2010/projects/RU-nstylo/nstylo/nstylo/static"
 elif "/var/www" in WRITABLE_DIR:
     # New configuration of http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab
