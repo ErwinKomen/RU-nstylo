@@ -1,4 +1,4 @@
-import sys
+import sys, json
 
 class ErrHandle:
     """Error handling"""
@@ -35,4 +35,11 @@ class ErrHandle:
         # Is this a fatal error that requires exiting?
         if (bExit):
             sys.exit(2)
+
+    def get_error(self):
+        lBack = []
+        for nErr in sys.exc_info():
+            if (nErr != None):
+                lBack.append(nErr)
+        return json.dumps(lBack)
 

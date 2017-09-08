@@ -25,7 +25,7 @@ if "RU-nstylo\\writable" in WRITABLE_DIR:
 
 APP_PREFIX = "/"
 STATICDIR = "/"
-if "d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR:
+if ("d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR) and (not os.path.exists(os.path.abspath(os.path.join(WRITABLE_DIR, "erwin")))):
     APP_PREFIX =  "nlab/"           # WAS:    ""
     admin.site.site_url = '/nlab'   # WAS:    '/'
     STATICDIR = "/Data Files/vs2010/projects/RU-nstylo/nstylo/nstylo/static"

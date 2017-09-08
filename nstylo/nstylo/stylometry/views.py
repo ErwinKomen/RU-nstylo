@@ -28,6 +28,7 @@ import json
 from nstylo.settings import APP_PREFIX, RESULTS_DIR, STATIC_ROOT, MEDIA_ROOT
 from nstylo.stylometry.models import *
 from nstylo.stylometry.forms import *
+import nstylo.services
 from nstylo.utils import ErrHandle
 
 conn = None
@@ -197,10 +198,11 @@ class NlabService(View):
             self.oErr.Status("NlabService - POST 1")
             params = request.POST
             self.oErr.Status("NlabService - POST 2")
-            sList = params['nstylo-freqlist']
+            sList = params.get('nstylo-freqlist')
             self.oErr.Status("NlabService - POST 3")
-            if sList == "":
+            if sList == "" or sList == None:
                 list = {}
+                self.oErr.Status("NlabService - POST: nstylo-freqlist is empty")
             else:
                 list = json.loads(sList)
 
@@ -209,7 +211,7 @@ class NlabService(View):
             self.data['html'] = self.process_data(list)
             self.oErr.Status("NlabService - POST 5\n{}".format(self.data['html']))
         except:
-            self.data['html'] = "an error has occurred in NlabService(View) at step {}".format(self.step)
+            self.data['html'] = "an error has occurred in NlabService(View) at step {}: {}".format(self.step, self.oErr.get_error())
 
         # Figure out what we are going to return
         back = json.dumps(self.data)
@@ -222,8 +224,8 @@ class NlabService(View):
         """The GET option is used in some instances"""
 
         self.oErr.Status("NlabService - GET")
-        get = request.GET
-        sList = get['nstylo-freqlist']
+        query = request.GET
+        sList = query.get('nstylo-freqlist')
         if sList == "":
             list = {}
         else:
@@ -234,8 +236,8 @@ class NlabService(View):
 
         # Figure out what we are going to return
         datadump = json.dumps(self.data)
-        if 'callback' in get:
-            callback = get['callback']
+        if 'callback' in query:
+            callback = query.get('callback')
             back = "{}({})".format(callback, datadump)
         else:
             back = datadump
@@ -277,3 +279,19 @@ def freq(request):
     datadump = json.dumps(data)
     back = "{}({})".format(callback, datadump)
     return HttpResponse(back, "application/json")
+
+
+class NlabInfo(View):
+    template_name = 'stylometry/info.html'
+
+    def get(self,request, **kwargs):
+        oReply = nstylo.services.get_information()
+        context = dict()
+        if 'status' in oReply and oReply['status'] == 'ok' and 'json' in oReply:
+            context['nlabinfo'] = oReply['json']
+        elif 'status' in oReply and oReply['status'] != 'ok':
+            context['nlabinfo'] = oReply['html']
+        else:
+            context['nlabinfo']  = 'No HTML in response'
+        return render_to_response(self.template_name, context,**kwargs)
+    

@@ -93,6 +93,7 @@
     <Content Include="nstylo\stylometry\static\stylometry\scripts\prototype.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.min.js" />
+    <Content Include="nstylo\stylometry\templates\stylometry\info.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\demo.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\fdc_result.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\sites_list.html" />

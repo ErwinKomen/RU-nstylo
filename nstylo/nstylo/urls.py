@@ -44,6 +44,7 @@ urlpatterns = [
     url(r'^freq', nstylo.stylometry.views.NlabTest.as_view(), name='freq'),
     url(r'^freq2', nstylo.stylometry.views.NlabTest.as_view(), name='freq2'),
     url(r'^freqtst', nstylo.stylometry.views.freq, name='freqtst'),
+    url(r'^info', nstylo.stylometry.views.NlabInfo.as_view(), name='info'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^login/$',
         django.contrib.auth.views.login,
