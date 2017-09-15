@@ -16,6 +16,8 @@ def get_information():
     lFreqs.append(oData)
     # Set the correct URL
     url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/freq"
+    # TESTING:
+    # url = "http://localhost/nlab/freq"
     params = {'nstylo-freqlist': json.dumps( lFreqs)}    # question
     oBack = {'status': 'ok'}
     # send the POST request
