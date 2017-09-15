@@ -249,3 +249,4 @@ ModelManifest.xml
 /nstylo/static/results
 /nstylo/nstylo/static/results
 *.pyc
+/nstylo/static

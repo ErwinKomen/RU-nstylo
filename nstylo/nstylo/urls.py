@@ -15,7 +15,7 @@ from nstylo.stylometry.views import *
 # from nstylo.stylometry.forms import *
 
 # Import from NSTYLO as a whole
-from nstylo.settings import APP_PREFIX
+from nstylo.settings import APP_PREFIX, STATIC_ROOT
 
 # Other Django stuff
 from django.core import urlresolvers
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^freqtst', nstylo.stylometry.views.freq, name='freqtst'),
     url(r'^info', nstylo.stylometry.views.NlabInfo.as_view(), name='info'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
+    url(r'^static/(?P<path>.*)$',django.views.static.serve, {'document_root': STATIC_ROOT}),
     url(r'^login/$',
         django.contrib.auth.views.login,
         {

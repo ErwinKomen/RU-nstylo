@@ -24,11 +24,11 @@ if "RU-nstylo\\writable" in WRITABLE_DIR:
     RESULTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/results/"))
 
 APP_PREFIX = "/"
-STATICDIR = "/"
+# STATICDIR = "/"
 if ("d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR) and (not os.path.exists(os.path.abspath(os.path.join(WRITABLE_DIR, "erwin")))):
     APP_PREFIX =  "nlab/"           # WAS:    ""
     admin.site.site_url = '/nlab'   # WAS:    '/'
-    STATICDIR = "/Data Files/vs2010/projects/RU-nstylo/nstylo/nstylo/static"
+    # STATICDIR = "/Data Files/vs2010/projects/RU-nstylo/nstylo/nstylo/static"
 elif "/var/www" in WRITABLE_DIR:
     # New configuration of http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab
     APP_PREFIX = "nlab/"
@@ -147,7 +147,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-if ("/var/www" in WRITABLE_DIR):
+if ("/var/www" in WRITABLE_DIR) or True:
     STATIC_URL = "/" + APP_PREFIX + "static/"
     MEDIA_URL = "/" + APP_PREFIX + "media/"
 
@@ -156,11 +156,11 @@ MEDIA_ROOT = os.path.abspath(os.path.join("/", posixpath.join(*(BASE_DIR.split(o
 
 
         
-STATICFILES_DIRS = [
-    STATICDIR
-]
+#STATICFILES_DIRS = [
+#    STATICDIR
+#]
 
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
 ]
