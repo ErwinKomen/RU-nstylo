@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # This is for Django Rest Framework (DRF)
+    'rest_framework',
     # Add your apps here to enable them
     'nstylo.stylometry',
 ]

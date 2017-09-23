@@ -37,6 +37,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="nstylo\stylometry\admin.py" />
+    <Compile Include="nstylo\stylometry\apiviews.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="nstylo\stylometry\apps.py" />
     <Compile Include="nstylo\stylometry\forms.py">
       <SubType>Code</SubType>

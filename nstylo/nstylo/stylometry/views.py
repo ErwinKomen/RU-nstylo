@@ -25,11 +25,18 @@ import random, os
 import pyRserve
 import json
 
+# REST framework
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import api_view
+
+# NSTYLO
 from nstylo.settings import APP_PREFIX, RESULTS_DIR, STATIC_ROOT, MEDIA_ROOT
 from nstylo.stylometry.models import *
 from nstylo.stylometry.forms import *
-import nstylo.services
 from nstylo.utils import ErrHandle
+import nstylo.services
 
 conn = None
 
@@ -249,36 +256,21 @@ class NlabService(View):
 class NlabTest(NlabService):
     
     def process_data(self, list):
-        # Process the data in the LIST
-        iSize = len(list)
-        for item in list:
-            x = item
-        # Open a connection with R
-        R = getRConnection()
-        y = R.erwin(json.dumps( list[0]))
+        return get_r_reply(list)
 
-        response = "NlabService 'process_data' receives a list of size {}, and 'R' returned {}".format(iSize, y)
-        # Return what we made
-        return response
+def get_r_reply(list, sCommand):
+    """Perform the [sCommand] in R on the data in [sTable]"""
 
+    # Decipher the table
+    iSize = len(list)
+    # Get an R connection
+    R = getRConnection()
+    # Do some action on this list
+    y = R.erwin(json.dumps(list[0]))
 
-def freq(request):
-
-    data = {'status': 'ok', 'html': 'Hello World'}       # Create data to be returned    
-    x = None
-    callback = ""
-
-    if request.method == "POST":
-        if request.POST:
-            x = request.POST
-    elif request.method == "GET":
-        if request.GET:
-            x = request.GET
-            callback = request.GET['callback']
-    # return JsonResponse(data)
-    datadump = json.dumps(data)
-    back = "{}({})".format(callback, datadump)
-    return HttpResponse(back, "application/json")
+    response = "get_r_reply receives a list of size {}, and 'R' returned {}".format(iSize, y)
+    # Return what we made
+    return response
 
 
 class NlabInfo(View):
@@ -295,3 +287,71 @@ class NlabInfo(View):
             context['nlabinfo']  = 'No HTML in response'
         return render_to_response(self.template_name, context,**kwargs)
     
+
+
+class NlabTableDetail(APIView):
+    """Focus on handling one table"""
+
+    oErr = ErrHandle()
+
+    def get_object(self, pk):
+        try:
+            return FreqTable.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, format=None):
+        """List all currently available freqtables"""
+
+        ftables = FreqTable.objects.all()
+        serializer = FreqTableSerializer(ftables, many=True)
+        return Response(serializer.data)
+
+
+    def post(self, request, format=None):
+        """Create a new FreqTable object"""
+
+        # Get the freqtable data and turn it into a FreqTable instance
+        serializer = FreqTableSerializer(data=request.data) 
+
+        try:
+            if serializer.is_valid():
+                # Save the FreqTable instance to the SQLite database
+                instance = serializer.save() 
+
+                # Find out who the owner is
+                owner = instance.owner
+                # Remove all previous instances of this owner
+                qs = FreqTable.objects.filter(owner=owner).exclude(id=instance.id)
+                if qs.count() > 0:
+                    qs.delete()
+
+                # Now perform the requested R-actions on the table data
+                sReply = get_r_reply(json.loads(instance.table), "analyze")
+
+                # Return an appropriate response
+                #return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(sReply, status=status.HTTP_200_OK)
+
+            # Getting here means that the data was not valid
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            # Show the error
+            self.oErr.DoError("NlabTableDetail.post")
+            # Getting here means that the data was not valid
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, pk, format=None):
+        """Retrieve one particular frequency table"""
+
+        ftable = self.get_object(pk)
+        ftable = FreqTableSerializer(ftable)
+        return Response(ftable.data)
+
+    def delete(self, request, pk, format=None):
+        """Delete one particular frequency table"""
+
+        ftable = self.get_object(pk)
+        ftable.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
