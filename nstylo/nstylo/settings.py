@@ -52,7 +52,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', 'corpus-studio-web.cttnww-meertens.surf-hosted.nl']
 
 CORS_ORIGIN_ALLOW_ALL = True
-
+ 
 # Application definition
 
 INSTALLED_APPS = [
