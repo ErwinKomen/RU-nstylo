@@ -193,7 +193,7 @@ class NlabService(View):
     # Initialisations
     arErr = []              # Array of errors
     oErr = ErrHandle()
-    step = "0"
+    step = "0" 
 
     data = {'status': 'ok', 'html': 'nlabservice is aan het werk'}       # Create data to be returned    
 
