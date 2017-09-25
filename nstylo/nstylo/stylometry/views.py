@@ -256,7 +256,7 @@ class NlabService(View):
 class NlabTest(NlabService):
     
     def process_data(self, list):
-        return get_r_reply(list)
+        return get_r_reply(list, "analyze")
 
 def get_r_reply(list, sCommand):
     """Perform the [sCommand] in R on the data in [sTable]"""
@@ -266,9 +266,12 @@ def get_r_reply(list, sCommand):
     # Get an R connection
     R = getRConnection()
     # Do some action on this list
-    y = R.erwin(json.dumps(list[0]))
+    lHeaderRow = list[0]
+    iColumns = len(lHeaderRow)
+    y = R.erwin(json.dumps(lHeaderRow))
 
-    response = "get_r_reply receives a list of size {}, and 'R' returned {}".format(iSize, y)
+
+    response = "get_r_reply receives a list of size {} by {}, and 'R' returned [{}]".format(iSize, iColumns, y)
     # Return what we made
     return response
 
@@ -311,11 +314,17 @@ class NlabTableDetail(APIView):
     def post(self, request, format=None):
         """Create a new FreqTable object"""
 
+        self.oErr.Status("NlabTableDetail - POST 1")
+
         # Get the freqtable data and turn it into a FreqTable instance
         serializer = FreqTableSerializer(data=request.data) 
 
+        self.oErr.Status("NlabTableDetail - POST 2")
+
         try:
             if serializer.is_valid():
+                self.oErr.Status("NlabTableDetail - POST 3")
+
                 # Save the FreqTable instance to the SQLite database
                 instance = serializer.save() 
 
@@ -326,8 +335,13 @@ class NlabTableDetail(APIView):
                 if qs.count() > 0:
                     qs.delete()
 
+                self.oErr.Status("NlabTableDetail - POST 4")
                 # Now perform the requested R-actions on the table data
                 sReply = get_r_reply(json.loads(instance.table), "analyze")
+
+                sReply = json.dumps({'status': 'ok', 'html': sReply});
+
+                self.oErr.Status("NlabTableDetail - POST 5 [{}]".format(sReply))
 
                 # Return an appropriate response
                 #return Response(serializer.data, status=status.HTTP_201_CREATED)

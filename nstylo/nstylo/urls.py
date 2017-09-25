@@ -45,7 +45,7 @@ urlpatterns = [
     url(r'^freq', nstylo.stylometry.views.NlabTest.as_view(), name='freq'),
     url(r'^ftableNew', nstylo.stylometry.apiviews.nlabdetail, name='ftableNew'),
     url(r'^ftable', nstylo.stylometry.views.NlabTableDetail.as_view(), name='ftable'),
-    url(r'^freqtst', nstylo.stylometry.views.freq, name='freqtst'),
+    # url(r'^freqtst', nstylo.stylometry.views.freq, name='freqtst'),
     url(r'^info', nstylo.stylometry.views.NlabInfo.as_view(), name='info'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^static/(?P<path>.*)$',django.views.static.serve, {'document_root': STATIC_ROOT}),
