@@ -74,6 +74,7 @@
   <ItemGroup>
     <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.min.css" />
+    <Content Include="nstylo\stylometry\static\stylometry\content\ru-base.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\site.css" />
     <Content Include="nstylo\stylometry\static\stylometry\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="nstylo\stylometry\static\stylometry\fonts\glyphicons-halflings-regular.svg" />
@@ -96,6 +97,7 @@
     <Content Include="nstylo\stylometry\static\stylometry\scripts\prototype.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.min.js" />
+    <Content Include="nstylo\stylometry\templates\stylometry\freqtable_list.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\info.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\demo.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\fdc_result.html" />

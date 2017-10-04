@@ -40,7 +40,7 @@ def get_information():
     elif sMethod == "rest":
         # Use the DRF method
         params = {'table': json.dumps(lFreqs), 'owner': 'erwin'}
-        url = "http://localhost:6401/ftable" 
+        url = "http://localhost:6401/ntable" 
         oResult = make_rest_request(url,params)
         if oResult == None:
             oBack['status'] = 'error'

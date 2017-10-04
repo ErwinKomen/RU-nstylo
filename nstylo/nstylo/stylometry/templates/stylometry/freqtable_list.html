@@ -1,0 +1,86 @@
+﻿{% extends "layout.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+      <a href="{% url 'home' %}">Home</a>
+      &rsaquo; Frequency Tables
+  </div>
+{% endblock %}
+
+{% block content %}
+
+  <div class="container body-content">
+    <div class="panel panel-default">
+      <form name="researchsearch" id="researchsearch" action="" method="get"  
+                onsubmit="return do_search('#id_submit_button', 'research', 'simple');" >
+        <!-- EK: A sort-order specification is in a hidden form field, which is filled by JS:do_sort_column() -->
+        <div class="hidden">
+          <input name='sortOrder' class='form-control' value='name' >
+          <input id="submit_type" name='submit_type' class='form-control' value='simple'>
+        </div>
+      </form>
+    </div>
+
+    {% if authenticated %}
+      {% if object_list %}
+        <h3>Overview of currently loaded frequency tables</h3>
+        <!-- Room for errors -->
+        <div id="research_err"></div>
+        <!-- The contents as a table -->
+        <table class="table table-hover">
+          <thead><tr><th class="hidden">id</th><th>Owner</th><th>Words</th><th>Texts</th><th>Titles</th><th></th></tr></thead>
+          <tbody>
+          {% for item in ftable_list %}
+            <tr class="function-item">
+              <td class="hidden">{{item.id}}</td>
+              <td><span class="research-item-user">{{item.owner}}</span></td>
+              <td><span class="research-item-type">{{item.wordnum}}</span></td>
+              <td><span class="research-item-name">{{item.textnum}}</span></td>
+              <td class="tdnowrap">
+                <div class="part-buttons">
+                    <a title="show all titles" 
+                       class="btn btn-success btn-xs" 
+                       onclick="ru.nstylo.ftableshow(this);">
+                      <span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+                    </a>
+                </div>
+              </td>
+            </tr>
+            <!-- Provide a form row for further information -->
+            <tr class="ftable-details hidden">
+              <td>Titles:</td>
+              <td colspan="3">
+                <span class="research-item-purpose">
+                  {% for title in item.titles %}
+                  <span class="ftable-title">
+                    <a role='button' class="btn btn-default btn-xs">{{forloop.counter}} {{title}}</a>
+                    {% if not forloop.last %} {% endif %}
+                  </span>
+                  {% endfor %}
+                </span>
+              </td>
+              <td></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>{% trans "No frequency tables are available" %}.</p>
+      {% endif %}
+    {% else %}
+    <div class="explanation">
+      <p>Dear user, you are <b>not</b> logged in.</p>
+      <p>Unfortunately this means that you will not be able to see any of the functions that are available.</p>
+      <p>Should you want to work with Cesar, then here are your options:
+        <ul>
+          <li><a class="btn btn-info btn-xs" href="{% url 'login' %}">Login</a> - if you have an account</li> 
+        </ul>
+      </p>
+    </div>
+    {% endif %}
+
+  </div>
+
+
+{% endblock content %}

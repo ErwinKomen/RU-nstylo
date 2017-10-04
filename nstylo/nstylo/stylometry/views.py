@@ -39,6 +39,7 @@ from nstylo.utils import ErrHandle
 import nstylo.services
 
 conn = None
+paginateEntries = 20
 
 if "\\" in STATIC_ROOT:
     resultDir = os.path.abspath(os.path.join(STATIC_ROOT.replace("\\nstylo\\","\\nstylo\\nstylo\\"), "results"))
@@ -59,25 +60,6 @@ rFuncStr = """
     }
 """
 
-#try:
-#    from rpy2.robjects import r as R
-
-#    def getRConnection():
-#        return R
-#except:
-#    import pyRserve
-#    conn = None
-#    rServeHost = 'localhost'
-#    rServePort = 6311
-
-#    def getRConnection():
-#        global conn
-#        if conn and type(conn) is pyRserve.rconn.RConnector and not conn.isClosed:
-#            return conn.r
-#        conn = pyRserve.connect(host=rServeHost, port=rServePort)
-#        conn.eval(rFuncStr)
-#        return conn.r
-
 def getRConnection():
     """Establish a connection with Rserve and load it with our program"""
 
@@ -90,7 +72,11 @@ def getRConnection():
         # Return the existing connection
         return conn.r
     # There's no connection yet: establish one
-    conn = pyRserve.connect(host=rServeHost, port=rServePort)
+    try:
+        conn = pyRserve.connect(host=rServeHost, port=rServePort)
+    except:
+        # This probably means that Rserve is not running
+        return None
     # Load the function that needs to be there
     conn.eval(rFuncStr)
     # Return the connection, which now contains our function
@@ -187,6 +173,28 @@ def doFDC(request):
     # Render the little piece of HTML that is going to be returned
     return render(request,'stylometry/fdc_result.html', context)
 
+def get_r_reply(list, sCommand):
+    """Perform the [sCommand] in R on the data in [sTable]"""
+
+    oBack = {'status': 'ok', 'response': ''}
+    # Decipher the table
+    iSize = len(list)
+    # Get an R connection
+    R = getRConnection()
+    if R == None:
+        oBack['status'] = 'error'
+        oBack['response'] = "Rserve is probably not running"
+        return oBack
+    # Do some action on this list
+    lHeaderRow = list[0]
+    iColumns = len(lHeaderRow)
+    y = R.erwin(json.dumps(lHeaderRow))
+
+
+    oBack['response'] = "get_r_reply receives a list of size {} by {}, and 'R' returned [{}]".format(iSize, iColumns, y)
+    # Return what we made
+    return oBack
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class NlabService(View):
@@ -253,27 +261,15 @@ class NlabService(View):
     def process_data(self, list):
         return "The data is not processed"
 
+
 class NlabTest(NlabService):
     
     def process_data(self, list):
-        return get_r_reply(list, "analyze")
-
-def get_r_reply(list, sCommand):
-    """Perform the [sCommand] in R on the data in [sTable]"""
-
-    # Decipher the table
-    iSize = len(list)
-    # Get an R connection
-    R = getRConnection()
-    # Do some action on this list
-    lHeaderRow = list[0]
-    iColumns = len(lHeaderRow)
-    y = R.erwin(json.dumps(lHeaderRow))
-
-
-    response = "get_r_reply receives a list of size {} by {}, and 'R' returned [{}]".format(iSize, iColumns, y)
-    # Return what we made
-    return response
+        oBack = get_r_reply(list, "analyze")
+        if oBack['status'] == 'ok':
+            return oBack['response']
+        else:
+            return ""
 
 
 class NlabInfo(View):
@@ -290,7 +286,6 @@ class NlabInfo(View):
             context['nlabinfo']  = 'No HTML in response'
         return render_to_response(self.template_name, context,**kwargs)
     
-
 
 class NlabTableDetail(APIView):
     """Focus on handling one table"""
@@ -337,11 +332,14 @@ class NlabTableDetail(APIView):
 
                 self.oErr.Status("NlabTableDetail - POST 4")
                 # Now perform the requested R-actions on the table data
-                sReply = get_r_reply(json.loads(instance.table), "analyze")
+                oResponse = get_r_reply(json.loads(instance.table), "analyze")
+                if oResponse['status'] == 'ok':
 
-                sReply = json.dumps({'status': 'ok', 'html': sReply});
+                    sReply = json.dumps({'status': 'ok', 'html': oResponse['response']});
 
-                self.oErr.Status("NlabTableDetail - POST 5 [{}]".format(sReply))
+                    self.oErr.Status("NlabTableDetail - POST 5 [{}]".format(sReply))
+                else:
+                    sReply = json.dumps({'status': 'error', 'html': oResponse['response']});
 
                 # Return an appropriate response
                 #return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -369,3 +367,41 @@ class NlabTableDetail(APIView):
         ftable.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class FreqtableListView(ListView):
+    """List all the currently loaded frequency tables"""
+    
+    model = FreqTable
+    template_name = "stylometry/freqtable_list.html"
+    paginate_by = paginateEntries
+    entrycount = 0
+    qs = None
+
+    def render_to_response(self, context, **response_kwargs):
+        # Present the available information sorted by owner
+        self.qs = FreqTable.objects.all().order_by('owner')
+        context['object_list'] = self.qs
+        # Add information to the context
+        currentuser = self.request.user
+        context['authenticated'] = currentuser.is_authenticated
+        ftable_list = []
+        for ftable in self.qs:
+            # Store the owner of this table
+            ftInfo = {'owner': ftable.owner}
+            # Unpack this table into a list
+            lTable = json.loads(ftable.table)
+            ftInfo['wordnum'] = len(lTable)
+            if len(lTable) == 0:
+                ftInfo['textnum'] = 0
+                ftInfo['titles'] = []
+            else:
+                ftInfo['textnum'] = len(lTable[0])
+                ftInfo['titles'] = lTable[0]
+            ftable_list.append(ftInfo)
+        context['ftable_list'] = ftable_list
+        # Continue with the normal operation
+        return super(FreqtableListView, self).render_to_response(context, **response_kwargs)
+
+    def get_queryset(self):
+        self.qs = FreqTable.objects.all().order_by('owner')
+        return self.qs
