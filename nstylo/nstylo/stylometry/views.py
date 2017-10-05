@@ -15,6 +15,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect, render_to_response
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 from django.views.generic.base import RedirectView
@@ -368,6 +369,87 @@ class NlabTableDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class FreqtableDetailView(DetailView):
+    """Process one particular frequency table"""
+
+    model = FreqTable
+    template_name = 'about.html'  # Fill this in when we are going to use it
+
+    def get(self, request, *args, **kwargs):
+        # Get the object instance we are dealing with
+        self.object = self.get_object()
+        # For further processing we need to have the context
+        context = self.get_context_data(**kwargs)
+        # Find out what type of operation is required
+        sType = self.request.GET.get('download_type', '')
+        if sType == 'freqtbl':
+            return self.download_freqtbl(context)
+        elif sType == 'wordlist':
+            return self.download_wordlist(context)
+
+        # Simply show the detailed view
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super(FreqtableDetailView, self).get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        context['descriptor'] = self.object
+        return context
+
+    def download_freqtbl(self, context):
+        """Turn the table into a stylo-type 'table_with_frequencies.txt'"""
+
+        # Get access to the table
+        lTable = json.loads( self.object.table)
+        sFileName = "table_with_frequencies.txt"
+        lResult = []
+        # Process the header row
+        lHeader = []
+        for item in lTable[0]:
+            if item != "":
+                lHeader.append('"{}"'.format(item))
+        lResult.append(" ".join(lHeader))
+        # Process all the remaining lines
+        for idx in range(1, len(lTable)):
+            lLine = lTable[idx]
+            lRow = []
+            lRow.append('"{}"'.format(lLine[0]))
+            for j in range(1, len(lLine)):
+                # This is a floating point number
+                lRow.append("{}".format(lLine[j]))
+            lResult.append(" ".join(lRow))
+        # Now turn the result list into a string
+        sResult = "\n".join(lResult)
+        # Build the result
+        response = HttpResponse(sResult, content_type='text/csv')
+        response['Content-Encoding'] = "utf-8"
+        response['Content-Disposition'] = 'attachment; filename="' + sFileName
+        # Return the result
+        return response
+
+    def download_wordlist(self, context):
+        """Turn the table into a stylo-type 'wordlist.txt'"""
+
+        # Get access to the table
+        lTable = json.loads( self.object.table)
+        sFileName = "wordlist.txt"
+        lResult = []
+        # Process all the remaining lines
+        for idx in range(1, len(lTable)):
+            lLine = lTable[idx]
+            lRow = []
+            # lResult.append('"{}"'.format(lLine[0]))
+            lResult.append(lLine[0])
+        # Now turn the result list into a string
+        sResult = "\n".join(lResult)
+        # Build the result
+        response = HttpResponse(sResult, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="' + sFileName
+        # Return the result
+        return response
+
+
+
 class FreqtableListView(ListView):
     """List all the currently loaded frequency tables"""
     
@@ -397,6 +479,8 @@ class FreqtableListView(ListView):
             else:
                 ftInfo['textnum'] = len(lTable[0])
                 ftInfo['titles'] = lTable[0]
+            ftInfo['pk'] = ftable.pk
+            ftInfo['id'] = ftable.id
             ftable_list.append(ftInfo)
         context['ftable_list'] = ftable_list
         # Continue with the normal operation

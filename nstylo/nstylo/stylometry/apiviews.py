@@ -13,22 +13,26 @@ from rest_framework import request
 
 from nstylo.stylometry.models import FreqTableSerializer
 
-@api_view(['POST'])
-def nlabdetail(req):
-    """Pass on a new request"""
 
-    if req.method == "POST":
-        # Get the freqtable data and turn it into a FreqTable instance
-        x = req.data
-        inst = FreqTableSerializer(data=x)
+# NOTE: this was created under development
+#       method is NOT IN CURRENT USE
 
-        if inst.is_valid():
-            # Save the FreqTable instance to the SQLite database
-            inst.save() 
+#@api_view(['POST'])
+#def nlabdetail(req):
+#    """Pass on a new request"""
 
-            # Return an appropriate response
-            return Response(inst.data, status=status.HTTP_201_CREATED)
+#    if req.method == "POST":
+#        # Get the freqtable data and turn it into a FreqTable instance
+#        x = req.data
+#        inst = FreqTableSerializer(data=x)
 
-        # Getting here means that the data was not valic
-        return Response(inst.errors, status=status.HTTP_400_BAD_REQUEST)
+#        if inst.is_valid():
+#            # Save the FreqTable instance to the SQLite database
+#            inst.save() 
+
+#            # Return an appropriate response
+#            return Response(inst.data, status=status.HTTP_201_CREATED)
+
+#        # Getting here means that the data was not valic
+#        return Response(inst.errors, status=status.HTTP_400_BAD_REQUEST)
         

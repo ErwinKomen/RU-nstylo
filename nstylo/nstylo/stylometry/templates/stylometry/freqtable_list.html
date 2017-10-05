@@ -29,7 +29,7 @@
         <div id="research_err"></div>
         <!-- The contents as a table -->
         <table class="table table-hover">
-          <thead><tr><th class="hidden">id</th><th>Owner</th><th>Words</th><th>Texts</th><th>Titles</th><th></th></tr></thead>
+          <thead><tr><th class="hidden">id</th><th>Owner</th><th>Words</th><th>Texts</th><th>Actions</th></tr></thead>
           <tbody>
           {% for item in ftable_list %}
             <tr class="function-item">
@@ -37,12 +37,26 @@
               <td><span class="research-item-user">{{item.owner}}</span></td>
               <td><span class="research-item-type">{{item.wordnum}}</span></td>
               <td><span class="research-item-name">{{item.textnum}}</span></td>
+              <!-- Specify action buttons here-->
               <td class="tdnowrap">
                 <div class="part-buttons">
+                    <!-- Action: show all titles -->
                     <a title="show all titles" 
                        class="btn btn-success btn-xs" 
                        onclick="ru.nstylo.ftableshow(this);">
                       <span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+                    </a>
+                    <!-- Action: convert to "table_with_frequencies.txt" -->
+                    <a title="table with frequencies" 
+                       class="btn btn-info btn-xs" 
+                       href="{% url 'ftable' pk=item.pk %}?download_type=freqtbl">
+                      <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>
+                    </a>
+                    <!-- Action: convert to "wordlist.txt" -->
+                    <a title="wordlist" 
+                       class="btn btn-warning btn-xs" 
+                       href="{% url 'ftable' pk=item.pk %}?download_type=wordlist">
+                      <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
                     </a>
                 </div>
               </td>
