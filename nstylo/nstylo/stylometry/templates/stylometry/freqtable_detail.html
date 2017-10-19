@@ -1,0 +1,50 @@
+﻿{% extends "layout.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+      <a href="{% url 'home' %}">Home</a>
+      &rsaquo; Frequency Tables
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="container body-content">
+
+    {% if authenticated %}
+      <!-- Room for errors -->
+      <div id="research_err"></div>
+
+      <!-- Provide details of this set -->
+      <div class="row">
+        <h3>Titles and authors (sorted)</h3>
+        <table>
+          <thead><tr><th>#</th><th>Author</th><th>Title</th></tr></thead>
+          <tbody>
+            {% for item in headers %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>{{item.author}}</td>
+              <td>{{item.title}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% else %}
+      <div class="explanation">
+        <p>Dear user, you are <b>not</b> logged in.</p>
+        <p>Unfortunately this means that you will not be able to see any of the functions that are available.</p>
+        <p>Should you want to work with Cesar, then here are your options:
+          <ul>
+            <li><a class="btn btn-info btn-xs" href="{% url 'login' %}">Login</a> - if you have an account</li> 
+          </ul>
+        </p>
+      </div>
+    {% endif %}
+
+  </div>
+
+
+{% endblock %}

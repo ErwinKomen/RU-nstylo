@@ -48,6 +48,8 @@ else:
     resultDir = os.path.abspath(os.path.join(STATIC_ROOT, "results"))
 
 rFuncStr = """
+    library(stylo)
+
     renderer <- function(filename, title, units) {
         dat <- rnorm(1000)
         png(file=filename, width=720, height=480)
@@ -59,6 +61,14 @@ rFuncStr = """
         txt = "bladerdak"
         return(txt)
     }
+
+    pca <- function(arTable) {
+        # Run stylo on [arTable]
+        result <- stylo(frequencies=arTable, analysis.type="PCR", gui=FALSE)
+        # Assuming there are results: return the PCA coordinates
+        return (result$pca.coordinates)
+    }
+
 """
 
 def getRConnection():
@@ -195,6 +205,28 @@ def get_r_reply(list, sCommand):
     oBack['response'] = "get_r_reply receives a list of size {} by {}, and 'R' returned [{}]".format(iSize, iColumns, y)
     # Return what we made
     return oBack
+
+def get_r_pca_reply(oTable):
+    """Perform the [PCA] in R on the data in [oTable]"""
+
+    oBack = {'status': 'ok', 'response': ''}
+    # Decipher the table
+    iSize = len(oTable)
+    # Get an R connection
+    R = getRConnection()
+    if R == None:
+        oBack['status'] = 'error'
+        oBack['response'] = "Rserve is probably not running"
+        return oBack
+    # Let R perform principle component analysis on oTable
+    y = R.pca(oTable)
+
+
+    oBack['response'] = "get_r_pca_reply is ready"
+    oBack['contents'] = y
+    # Return what we made
+    return oBack
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -369,11 +401,22 @@ class NlabTableDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+def get_author_title_list(oTable):
+    """Get the author-title information from the first line of the table"""
+
+    lInfo = sorted(oTable[0])
+    lOut = []
+    for item in lInfo:
+        arInfo = item.split("_")
+        lOut.append({"author": arInfo[0], "title": arInfo[1]})
+    return lOut
+
+
 class FreqtableDetailView(DetailView):
     """Process one particular frequency table"""
 
     model = FreqTable
-    template_name = 'about.html'  # Fill this in when we are going to use it
+    template_name = 'stylometry/freqtable_detail.html'  # Fill this in when we are going to use it
 
     def get(self, request, *args, **kwargs):
         # Get the object instance we are dealing with
@@ -386,6 +429,18 @@ class FreqtableDetailView(DetailView):
             return self.download_freqtbl(context)
         elif sType == 'wordlist':
             return self.download_wordlist(context)
+    
+        # Getting here means there was no relevant [download_type]
+        oTable = json.loads(self.object.table)
+        context['headers'] =  get_author_title_list(oTable)
+        currentuser = self.request.user
+        context['authenticated'] = currentuser.is_authenticated
+
+        # Find an rfunction (if existing)
+        sType = self.request.GET.get('rfunction', '')
+        if sType == 'pca':
+            # The user wants to have a PCA done on the data
+            oResponse = get_r_pca_reply(oTable)
 
         # Simply show the detailed view
         return self.render_to_response(context)

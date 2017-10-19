@@ -58,6 +58,10 @@
                        href="{% url 'ftable' pk=item.pk %}?download_type=wordlist">
                       <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
                     </a>
+                    <!-- Action: perform a PCA (principle components analysis) using R -->
+                    <a title="Principle Components Analysis"
+                       class="btn btn-default btn-xs"
+                       href="{% url 'ftable' pk=item.pk %}?rfunction=pca">R: PCA</a>
                 </div>
               </td>
             </tr>
