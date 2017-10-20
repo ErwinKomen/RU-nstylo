@@ -93,6 +93,28 @@ def getRConnection():
     # Return the connection, which now contains our function
     return conn.r
 
+def getRConnObject():
+    """Establish a connection with Rserve and load it with our program"""
+
+    global conn
+    rServeHost = 'localhost'
+    rServePort = 6311
+
+    # Check if a connection alread exists
+    if conn and type(conn) is pyRserve.rconn.RConnector and not conn.isClosed:
+        # Return the existing connection
+        return conn
+    # There's no connection yet: establish one
+    try:
+        conn = pyRserve.connect(host=rServeHost, port=rServePort)
+    except:
+        # This probably means that Rserve is not running
+        return None
+    # Load the function that needs to be there
+    conn.eval(rFuncStr)
+    # Return the connection, which now contains our function
+    return conn
+
 def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
@@ -210,22 +232,31 @@ def get_r_pca_reply(oTable):
     """Perform the [PCA] in R on the data in [oTable]"""
 
     oBack = {'status': 'ok', 'response': ''}
-    # Decipher the table
-    iSize = len(oTable)
-    # Get an R connection
-    R = getRConnection()
-    if R == None:
-        oBack['status'] = 'error'
-        oBack['response'] = "Rserve is probably not running"
+    oErr = ErrHandle()
+    try:
+        # Decipher the table
+        iSize = len(oTable)
+        # Get an R connection
+        connThis = getRConnObject()
+        if connThis == None:
+            oBack['status'] = 'error'
+            oBack['response'] = "Rserve is probably not running"
+            return oBack
+        # Get the table into 'R' as variable [aTable]
+        connThis.r.aTable = oTable
+        # Let R perform principle component analysis on oTable
+        y = connThis.r.pca(connThis.ref.aTable)
+
+
+        oBack['response'] = "get_r_pca_reply is ready"
+        oBack['contents'] = y
+        # Return what we made
         return oBack
-    # Let R perform principle component analysis on oTable
-    y = R.pca(oTable)
-
-
-    oBack['response'] = "get_r_pca_reply is ready"
-    oBack['contents'] = y
-    # Return what we made
-    return oBack
+    except:
+        msg = oErr.DoError("get_r_pca_reply error: ")
+        oBack['status'] = 'error'
+        oBack['response'] = msg
+        return oBack
 
 
 
