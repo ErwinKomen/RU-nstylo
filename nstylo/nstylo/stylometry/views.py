@@ -62,9 +62,38 @@ rFuncStr = """
         return(txt)
     }
 
-    pca <- function(arTable) {
-        # Run stylo on [arTable]
-        result <- stylo(frequencies=arTable, analysis.type="PCR", gui=FALSE)
+    jsonListToTable <- function(sJson) {
+        # COnvert string to list of lists
+        lstThis <- rjson::fromJSON(sJson)
+
+        # Get the number of rows and the number of columns
+        nRows <- length(lstThis) - 1  # First row is for column names
+        nCols <- length(lstThis[[1]])+1   # Number of columns
+        rNames <- c()
+
+        # Create an empty data frame
+        table_df <- data.frame()
+
+        # Walk all the lists, starting from row #2
+        for ( i in 2:length(lstThis)) {
+          # Get this row
+          row <- lstThis[[i]]
+          # Add row to data frame
+          table_df <- rbind(table_df, row[2:nCols])
+          # Add row name to list
+          rNames <- c(rNames, row[[1]])
+        }
+        # Set the correct column names
+        names(table_df) <- lstThis[[1]]
+        row.names(table_df) <- rNames
+
+        # Return the data.frame that has now been created
+        return(table_df)
+    }
+
+    pca <- function(oTable) {
+        # Run stylo on [oTable]
+        result <- stylo(frequencies=oTable, analysis.type="PCR", gui=FALSE)
         # Assuming there are results: return the PCA coordinates
         return (result$pca.coordinates)
     }
@@ -245,7 +274,7 @@ def get_r_pca_reply(oTable):
         # Get the table into 'R' as variable [aTable]
         connThis.r.aTable = oTable
         # Let R perform principle component analysis on oTable
-        y = connThis.r.pca(connThis.ref.aTable)
+        y = connThis.r.pca(connThis.r.aTable)
 
 
         oBack['response'] = "get_r_pca_reply is ready"
