@@ -29,7 +29,8 @@ import json
 # REST framework
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, authentication, permissions
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view
 
 # NSTYLO
@@ -49,6 +50,7 @@ else:
 
 rFuncStr = """
     library(stylo)
+    library(rjson)
 
     renderer <- function(filename, title, units) {
         dat <- rnorm(1000)
@@ -62,33 +64,24 @@ rFuncStr = """
         return(txt)
     }
 
-    jsonListToTable <- function(sJson) {
-        # COnvert string to list of lists
-        lstThis <- rjson::fromJSON(sJson)
-
-        # Get the number of rows and the number of columns
-        nRows <- length(lstThis) - 1  # First row is for column names
-        nCols <- length(lstThis[[1]])+1   # Number of columns
-        rNames <- c()
-
-        # Create an empty data frame
-        table_df <- data.frame()
-
-        # Walk all the lists, starting from row #2
-        for ( i in 2:length(lstThis)) {
-          # Get this row
-          row <- lstThis[[i]]
-          # Add row to data frame
-          table_df <- rbind(table_df, row[2:nCols])
-          # Add row name to list
-          rNames <- c(rNames, row[[1]])
-        }
-        # Set the correct column names
-        names(table_df) <- lstThis[[1]]
-        row.names(table_df) <- rNames
-
-        # Return the data.frame that has now been created
-        return(table_df)
+    jsonObjectToTable <- function(sJson) {
+      # COnvert string to list of lists
+      oThis <- rjson::fromJSON(sJson)
+  
+      nRows <- oThis$nrows              #  oThis['nrows'][[1]]
+      nCols <- oThis$ncols              #  oThis['ncols'][[1]]
+      rNames <- oThis$rowheaders        #  oThis['rowheaders'][[1]]
+      cNames <- oThis$columnheaders     #  oThis['columnheaders'][[1]]
+      tblThis <- oThis$table            #  oThis['table'][[1]]
+      # Put table into matrix
+      mThis <- matrix(data=tblThis, nrow=nRows, ncol=nCols)
+      df_table <- data.frame(mThis)
+      # Set column names and row names
+      names(df_table) <- cNames
+      row.names(df_table) <- rNames
+  
+      # Return the data.frame that has now been created
+      return(df_table)
     }
 
     pca <- function(oTable) {
@@ -97,6 +90,24 @@ rFuncStr = """
         # Assuming there are results: return the PCA coordinates
         return (result$pca.coordinates)
     }
+    
+    pca2 <- function(sTable) {
+
+        # Convert input
+        oTable <- jsonObjectToTable(sTable)
+
+        # Run stylo on [oTable]
+        result <- stylo(frequencies=oTable, analysis.type="PCR", gui=FALSE, 
+                        write.png.file = TRUE,
+                        custom.graph.filename="cesar_pca")
+        # Note: the resulting PNG is written in a file cesar_pca_nnn.png
+        #       where "nnn" is a consecutive number
+        # Directory: see getwd()
+
+        # Assuming there are results: return the PCA coordinates
+        return (result$pca.coordinates)
+    }
+
 
 """
 
@@ -257,14 +268,12 @@ def get_r_reply(list, sCommand):
     # Return what we made
     return oBack
 
-def get_r_pca_reply(oTable):
-    """Perform the [PCA] in R on the data in [oTable]"""
+def get_r_pca_reply(sTable):
+    """Perform the [PCA] in R on the data in [sTable]"""
 
     oBack = {'status': 'ok', 'response': ''}
     oErr = ErrHandle()
     try:
-        # Decipher the table
-        iSize = len(oTable)
         # Get an R connection
         connThis = getRConnObject()
         if connThis == None:
@@ -272,13 +281,17 @@ def get_r_pca_reply(oTable):
             oBack['response'] = "Rserve is probably not running"
             return oBack
         # Get the table into 'R' as variable [aTable]
-        connThis.r.aTable = oTable
-        # Let R perform principle component analysis on oTable
-        y = connThis.r.pca(connThis.r.aTable)
+        # OLD: connThis.r.aTable = oTable
 
+        # Let 'R' convert the table into a data frame
+        connThis.r.dfTable = connThis.r.jsonObjectToTable(sTable)
+
+        # Let R perform principle component analysis on oTable
+        # y = connThis.r.pca(connThis.ref.dfTable)
+        pcaResult = connThis.r.pca2(sTable)
 
         oBack['response'] = "get_r_pca_reply is ready"
-        oBack['contents'] = y
+        oBack['contents'] = pcaResult
         # Return what we made
         return oBack
     except:
@@ -380,10 +393,18 @@ class NlabInfo(View):
         return render_to_response(self.template_name, context,**kwargs)
     
 
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    """Provide a class that does not require CSRF authentication"""
+
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+
 class NlabTableDetail(APIView):
     """Focus on handling one table"""
 
     oErr = ErrHandle()
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def get_object(self, pk):
         try:
@@ -425,7 +446,8 @@ class NlabTableDetail(APIView):
 
                 self.oErr.Status("NlabTableDetail - POST 4")
                 # Now perform the requested R-actions on the table data
-                oResponse = get_r_reply(json.loads(instance.table), "analyze")
+                oResponse = get_r_pca_reply(instance.table)
+                # OLD:oResponse = get_r_reply(json.loads(instance.table), "analyze")
                 if oResponse['status'] == 'ok':
 
                     sReply = json.dumps({'status': 'ok', 'html': oResponse['response']});
@@ -492,7 +514,7 @@ class FreqtableDetailView(DetailView):
     
         # Getting here means there was no relevant [download_type]
         oTable = json.loads(self.object.table)
-        context['headers'] =  get_author_title_list(oTable)
+        context['headers'] = oTable['columnheaders']       #   get_author_title_list(oTable)
         currentuser = self.request.user
         context['authenticated'] = currentuser.is_authenticated
 
@@ -500,7 +522,8 @@ class FreqtableDetailView(DetailView):
         sType = self.request.GET.get('rfunction', '')
         if sType == 'pca':
             # The user wants to have a PCA done on the data
-            oResponse = get_r_pca_reply(oTable)
+            # NOTE: send the data as is--as stringified JSON
+            oResponse = get_r_pca_reply(self.object.table)
 
         # Simply show the detailed view
         return self.render_to_response(context)
@@ -585,15 +608,22 @@ class FreqtableListView(ListView):
         for ftable in self.qs:
             # Store the owner of this table
             ftInfo = {'owner': ftable.owner}
-            # Unpack this table into a list
-            lTable = json.loads(ftable.table)
-            ftInfo['wordnum'] = len(lTable)
-            if len(lTable) == 0:
-                ftInfo['textnum'] = 0
-                ftInfo['titles'] = []
+            # Unpack this table
+            oTable = json.loads(ftable.table)
+
+            # Find out what kind of table this is
+            if 'nrows' in oTable:
+                ftInfo['wordnum'] = oTable['nrows']
+                ftInfo['textnum'] = oTable['ncols']
+                ftInfo['titles'] = oTable['columnheaders']
             else:
-                ftInfo['textnum'] = len(lTable[0])
-                ftInfo['titles'] = lTable[0]
+                ftInfo['wordnum'] = len(oTable)
+                if len(oTable) == 0:
+                    ftInfo['textnum'] = 0
+                    ftInfo['titles'] = []
+                else:
+                    ftInfo['textnum'] = len(oTable[0])
+                    ftInfo['titles'] = oTable[0]
             ftInfo['pk'] = ftable.pk
             ftInfo['id'] = ftable.id
             ftable_list.append(ftInfo)
