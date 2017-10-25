@@ -291,8 +291,19 @@ def get_r_pca_reply(sTable):
         # Let R perform 'stylo' PCR directly on [sTable]
         pcaResult = connThis.r.pca2(sTable)
 
-        oBack['response'] = "get_r_pca_reply is ready"
-        oBack['contents'] = pcaResult
+        # Convert the resulting PCA table into a list of lists
+        lPca = []
+        for row in pcaResult:
+            lRow = []
+            for cell in row:
+                lRow.append(cell)
+            lPca.append(lRow)
+            nCols = len(lRow)
+        nRows = len(lPca)
+
+
+        oBack['contents'] = lPca
+        oBack['response'] = "get_r_pca_reply: I have pca coordinates of {} rows by {} columns".format(nRows, nCols)
         # Return what we made
         return oBack
     except:
