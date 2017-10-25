@@ -32,6 +32,32 @@
         </table>
       </div>
 
+      <!-- Continue if there is a status -->
+      {% if status %}
+        <div class="row">Status: {{status}}</div>
+
+        <!-- Process a response -->
+        {% if r_response %}
+          <div class="row">R response: {{r_response}}</div>
+        {% endif %}
+
+        <!-- Show the contents -->
+        {% if r_contents %}
+          <div class="row">
+            <h4>PCA coordinates:</h4>
+            <table>
+              {% for row in r_contents %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{cell}}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+        {% endif %}
+      {% endif %}
+
     {% else %}
       <div class="explanation">
         <p>Dear user, you are <b>not</b> logged in.</p>

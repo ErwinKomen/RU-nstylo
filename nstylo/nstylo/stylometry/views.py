@@ -50,7 +50,7 @@ else:
 
 rFuncStr = """
     library(stylo)
-    library(rjson)
+    library(jsonlite)
 
     renderer <- function(filename, title, units) {
         dat <- rnorm(1000)
@@ -66,7 +66,7 @@ rFuncStr = """
 
     jsonObjectToTable <- function(sJson) {
       # COnvert string to list of lists
-      oThis <- rjson::fromJSON(sJson)
+      oThis <- jsonlite::fromJSON(sJson)
   
       nRows <- oThis$nrows              #  oThis['nrows'][[1]]
       nCols <- oThis$ncols              #  oThis['ncols'][[1]]
@@ -280,14 +280,15 @@ def get_r_pca_reply(sTable):
             oBack['status'] = 'error'
             oBack['response'] = "Rserve is probably not running"
             return oBack
-        # Get the table into 'R' as variable [aTable]
-        # OLD: connThis.r.aTable = oTable
 
         # Let 'R' convert the table into a data frame
         connThis.r.dfTable = connThis.r.jsonObjectToTable(sTable)
 
-        # Let R perform principle component analysis on oTable
+        # Let R perform principle component analysis on dfTable
         # y = connThis.r.pca(connThis.ref.dfTable)
+        # NOTE: somehow this does not work. WHY??
+
+        # Let R perform 'stylo' PCR directly on [sTable]
         pcaResult = connThis.r.pca2(sTable)
 
         oBack['response'] = "get_r_pca_reply is ready"
@@ -450,7 +451,9 @@ class NlabTableDetail(APIView):
                 # OLD:oResponse = get_r_reply(json.loads(instance.table), "analyze")
                 if oResponse['status'] == 'ok':
 
-                    sReply = json.dumps({'status': 'ok', 'html': oResponse['response']});
+                    sReply = json.dumps({'status': 'ok', 
+                                         'html': oResponse['response'],
+                                         'contents': oResponse['contents']});
 
                     self.oErr.Status("NlabTableDetail - POST 5 [{}]".format(sReply))
                 else:
@@ -524,6 +527,20 @@ class FreqtableDetailView(DetailView):
             # The user wants to have a PCA done on the data
             # NOTE: send the data as is--as stringified JSON
             oResponse = get_r_pca_reply(self.object.table)
+            # Check the response and make it available
+            context['status'] = oResponse['status']
+            if oResponse['status'] == "ok":
+                context['r_response'] = oResponse['response']
+                # Get the PCA coordinates
+                pca_coordinates = oResponse['contents']
+                # Work these into a table
+                oTable = []
+                for item in pca_coordinates:
+                    lRow = []
+                    for cell in item:
+                        lRow.append(cell)
+                    oTable.append(lRow)
+                context['r_contents'] = oTable
 
         # Simply show the detailed view
         return self.render_to_response(context)
