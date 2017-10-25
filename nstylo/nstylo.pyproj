@@ -72,6 +72,7 @@
     <Folder Include="nstylo\stylometry\templates\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="nstylo\stylometry\static\stylometry\content\additional-styles.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.min.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\ru-base.css" />
@@ -85,6 +86,8 @@
     <Content Include="nstylo\stylometry\static\stylometry\scripts\bootstrap.min.js" />
     <None Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate-vsdoc.js" />
     <None Include="nstylo\stylometry\static\stylometry\scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\d3.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\d3.v3.min.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\nstylo.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery-1.10.2.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery-1.10.2.min.js" />

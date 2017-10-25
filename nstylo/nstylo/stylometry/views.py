@@ -96,16 +96,21 @@ rFuncStr = """
         # Convert input
         oTable <- jsonObjectToTable(sTable)
 
-        # Run stylo on [oTable]
-        result <- stylo(frequencies=oTable, analysis.type="PCR", gui=FALSE, 
-                        write.png.file = TRUE,
+        # Run stylo on the transformed versino of [oTable]
+        result <- stylo(frequencies=t(oTable), analysis.type="PCR", gui=FALSE, 
+                        write.png.file = TRUE, write.svg.file = TRUE,
                         custom.graph.filename="cesar_pca")
         # Note: the resulting PNG is written in a file cesar_pca_nnn.png
         #       where "nnn" is a consecutive number
         # Directory: see getwd()
 
         # Assuming there are results: return the PCA coordinates
-        return (result$pca.coordinates)
+
+        oBack <- list(
+                 table=result$pca.coordinates, 
+                 rownames=row.names(result$pca.coordinates), 
+                 colnames=names(as.data.frame(result$pca.coordinates)))
+        return (jsonlite::toJSON(oBack))
     }
 
 
@@ -289,20 +294,28 @@ def get_r_pca_reply(sTable):
         # NOTE: somehow this does not work. WHY??
 
         # Let R perform 'stylo' PCR directly on [sTable]
-        pcaResult = connThis.r.pca2(sTable)
+        spcaResult = connThis.r.pca2(sTable)
+        pcaResult = json.loads(spcaResult[0])
 
-        # Convert the resulting PCA table into a list of lists
-        lPca = []
-        for row in pcaResult:
+        # Adapt the resulting table with the information in object pcaResult
+        lTable = []
+        lRow = ['']
+        for hdr in pcaResult['colnames']:
+            lRow.append(hdr)
+        lTable.append(lRow)
+        for idx in range(0, len(pcaResult['rownames'])):
             lRow = []
-            for cell in row:
+            lRow.append(pcaResult['rownames'][idx])
+            for cell in pcaResult['table'][idx]:
                 lRow.append(cell)
-            lPca.append(lRow)
-            nCols = len(lRow)
-        nRows = len(lPca)
+            lTable.append(lRow)
+        nCols = len(pcaResult['colnames'])
+        nRows = len(pcaResult['rownames'])
+        
+        # Add the full table 
+        pcaResult['fulltable'] = lTable
 
-
-        oBack['contents'] = lPca
+        oBack['contents'] = pcaResult
         oBack['response'] = "get_r_pca_reply: I have pca coordinates of {} rows by {} columns".format(nRows, nCols)
         # Return what we made
         return oBack
@@ -311,8 +324,7 @@ def get_r_pca_reply(sTable):
         oBack['status'] = 'error'
         oBack['response'] = msg
         return oBack
-
-
+    
 
 @method_decorator(csrf_exempt, name='dispatch')
 class NlabService(View):
@@ -411,6 +423,26 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
 
+
+class GetTableData(APIView):
+    """Provide JSON data of one table for d3 drawing"""
+
+    oErr = ErrHandle()
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+
+    def post(self, request, *args, **kwargs):
+        """Return the data of the FreqTable object"""
+
+        # Get the FreqTable object with the 'pk' in [kwargs]
+        self.object = FreqTable.objects.get(pk=kwargs['pk'])
+
+        # Get the PCA data
+        oPca = self.object.get_pca()
+
+        response = JsonResponse(oPca, safe=False)
+        return response
+    
+
 class NlabTableDetail(APIView):
     """Focus on handling one table"""
 
@@ -430,8 +462,7 @@ class NlabTableDetail(APIView):
         ftables = FreqTable.objects.all()
         serializer = FreqTableSerializer(ftables, many=True)
         return Response(serializer.data)
-
-
+    
     def post(self, request, format=None):
         """Create a new FreqTable object"""
 
@@ -532,6 +563,9 @@ class FreqtableDetailView(DetailView):
         currentuser = self.request.user
         context['authenticated'] = currentuser.is_authenticated
 
+        # Make sure the object id is available
+        context['table_id'] = self.object.id
+
         # Find an rfunction (if existing)
         sType = self.request.GET.get('rfunction', '')
         if sType == 'pca':
@@ -543,15 +577,9 @@ class FreqtableDetailView(DetailView):
             if oResponse['status'] == "ok":
                 context['r_response'] = oResponse['response']
                 # Get the PCA coordinates
-                pca_coordinates = oResponse['contents']
-                # Work these into a table
-                oTable = []
-                for item in pca_coordinates:
-                    lRow = []
-                    for cell in item:
-                        lRow.append(cell)
-                    oTable.append(lRow)
-                context['r_contents'] = oTable
+                context['r_contents'] = oResponse['contents']
+                # Make sure to store these results in the appropriate object
+                self.object.set_pca(oResponse['contents'])
 
         # Simply show the detailed view
         return self.render_to_response(context)
@@ -613,8 +641,7 @@ class FreqtableDetailView(DetailView):
         response['Content-Disposition'] = 'attachment; filename="' + sFileName
         # Return the result
         return response
-
-
+    
 
 class FreqtableListView(ListView):
     """List all the currently loaded frequency tables"""

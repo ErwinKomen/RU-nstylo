@@ -256,3 +256,4 @@ ModelManifest.xml
 /nstylo/nstylo/stylometry/migrations/0003_remove_freqtable_created.py
 /nstylo/nstylo/stylometry/migrations/0004_freqtable_owner.py
 /nstylo/nstylo/stylometry/migrations/0005_auto_20170923_0848.py
+/nstylo/nstylo/stylometry/migrations/0002_freqtable_pca.py

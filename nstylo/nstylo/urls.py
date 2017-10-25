@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^ftable/list',  FreqtableListView.as_view(),                name='ftable_list'),
     # url(r'^fdetail/(?P<pk>\d+)/$', FreqtableDetailView.as_view(),     name='fdetail'),
     url(r'^ntable',       NlabTableDetail.as_view(),                  name='ntable'),
+    url(r'^ajax/tabledata/(?P<pk>\d+)/$',GetTableData.as_view(),      name='tabledata'), 
     url(r'^info',         NlabInfo.as_view(),                         name='info'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^static/(?P<path>.*)$',django.views.static.serve, {'document_root': STATIC_ROOT}),

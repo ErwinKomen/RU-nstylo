@@ -33,6 +33,80 @@ var ru = (function ($, ru) {
     return {
 
       /**
+       *  addGraph
+       *      Add a graph at sLocation
+       *
+       */
+      addGraph: function (sLocation) {
+        var chart = null,
+            svg = null;
+
+        try {
+          // Find out what the location is
+          svg = $("#" + sLocation).find("svg");
+
+          chart = nv.models.discreteBarChart()
+        } catch (ex) {
+          private_methods.errMsg("addGraph", ex);
+        }
+      },
+
+      /**
+       *  gettabledata
+       *      Get JSON table data by calling the URL
+       *
+       */
+      gettabledata: function (sUrl) {
+        var result = null;
+
+        $.post(sUrl, function (data) {
+          result = data;
+        });
+
+        // Return what we found
+        return result;
+      },
+
+      /**
+       *  showtabledata
+       *      Get data from [sUrl] and show it in location [sDiv]
+       *
+       */
+      showtabledata: function (sUrl, sDiv) {
+        var svg = null,
+            result = null,  // 
+            oTable = null,  // Just the table
+            oThat = null;
+
+        try {
+          // Find out where to put it
+          svg = d3.select(sDiv)
+                  .append("svg")
+                  .attr("width", 300)
+                  .attr("height", 200)
+                  .attr("transform", "translate(100,300)");
+          // Make a POST call to get the data
+          $.post(sUrl, function (oFreqData) {
+            // Get the table from here
+            oTable = oFreqData['table'];
+            // Show the table
+            svg.selectAll("circle")
+              .data(oTable)
+              .enter()
+              .append("circle")
+              .attr("cx", 4)
+              .attr("cy", 2)
+              .attr("r", 5);
+            // We now have the data: show it
+            result = oFreqData;
+          });
+          // Function doesn't return anything
+        } catch (ex) {
+          private_methods.errMsg("showtabledata", ex);
+        }
+      },
+
+      /**
        *  ftableshow
        *      Show the definition of a frequency table
        *

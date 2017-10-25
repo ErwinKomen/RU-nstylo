@@ -46,17 +46,40 @@
           <div class="row">
             <h4>PCA coordinates:</h4>
             <table>
-              {% for row in r_contents %}
-              <tr>
-                {% for cell in row %}
-                  <td>{{cell}}</td>
+              <thead>
+                <tr>
+                  {% for colheading in r_contents.colnames %}
+                  <th>{{colheading}}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in r_contents.fulltable %}
+                {% if not forloop.first %}
+                <tr>
+                  {% for cell in row %}
+                    <td>{{cell}}</td>
+                  {% endfor %}
+                </tr>
+                {% endif %}
                 {% endfor %}
-              </tr>
-              {% endfor %}
+              </tbody>
             </table>
           </div>
         {% endif %}
+
+        <!-- Make room for an SVG plot-->
+        <div id="svgplot">
+          <!-- This is where the SVG will appear -->
+        </div>
       {% endif %}
+
+    <!-- The script to run the code -->
+    <script>
+      // Call the function to get the data and draw a chart
+      ru.nstylo.showtabledata("{% url 'tabledata' pk=table_id %}", "#svgplot");
+    </script>
+
 
     {% else %}
       <div class="explanation">
