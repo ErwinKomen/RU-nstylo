@@ -75,6 +75,7 @@
     <Content Include="nstylo\stylometry\static\stylometry\content\additional-styles.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\bootstrap.min.css" />
+    <Content Include="nstylo\stylometry\static\stylometry\content\nv.d3.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\ru-base.css" />
     <Content Include="nstylo\stylometry\static\stylometry\content\site.css" />
     <Content Include="nstylo\stylometry\static\stylometry\fonts\glyphicons-halflings-regular.eot" />
@@ -97,6 +98,7 @@
     <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.unobtrusive.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\modernizr-2.6.2.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\nv.d3.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\prototype.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.min.js" />
