@@ -414,8 +414,14 @@ class NlabInfo(View):
     template_name = 'stylometry/info.html'
 
     def get(self,request, **kwargs):
-        oReply = nstylo.services.get_information()
+        sType = 'vm'
+        if 'path' in kwargs:
+            sType = kwargs['path']
+            # Clear the kwargs 'path'
+            kwargs.pop('path')
+        oReply = nstylo.services.get_information(sType)
         context = dict()
+        context['callpath'] = oReply['url']
         if 'status' in oReply and oReply['status'] == 'ok' and 'json' in oReply:
             context['nlabinfo'] = oReply['json']
         elif 'status' in oReply and oReply['status'] != 'ok':

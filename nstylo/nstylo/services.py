@@ -9,57 +9,42 @@ from nstylo.utils import ErrHandle
 # Set the method
 sMethod = "rest"
 
-def get_information():
+def get_information(sType):
     """Receive information"""
 
-    # Create a list of lists
-    lFreqs = []
-    oHeader = [ ['aap'], ['noot'], ['mies'], ['erwin'] ] 
-    lFreqs.append(oHeader)
-    oData = [[3],     [4],      [5], [6]     ]
-    lFreqs.append(oData)
-    oData = [[7],     [8],      [9], [2]     ]
-    lFreqs.append(oData)
-    # Set the correct URL
-    url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/freq"
-    # TESTING:
-    # url = "http://localhost/nlab/freq"
-    url = "http://localhost:6401/freq" 
-
-    params = {'nstylo-freqlist': json.dumps( lFreqs)}    # question
     oBack = {'status': 'ok'}
-
-    if sMethod == "urllib":
-        # Use the URLLIB method
-        oResult = make_post_request(url, params)
-        if oResult == None:
-            oBack['status'] = 'error'
-        else:
-            oBack['status'] = 'ok'
-            oBack['json'] = oResult
-    elif sMethod == "rest":
-        # Use the DRF method
-        params = {'table': json.dumps(lFreqs), 'owner': 'erwin'}
-        url = "http://localhost:6401/ntable" 
-        oResult = make_rest_request(url,params)
-        if oResult == None:
-            oBack['status'] = 'error'
-        else:
-            oBack['status'] = 'ok'
-            oBack['json'] = oResult
+    # Create an object that can be processed
+    oFreqs = {}
+    lColumnHeaders = [ 'aap', 'noot', 'mies', 'erwin' ]
+    lRowHeaders = ['met', 'een', 'gezwinde', 'spoed']
+    oFreqs['nrows'] = len(lRowHeaders)
+    oFreqs['ncols'] = len(lColumnHeaders)
+    oFreqs['table'] = [0.2, 0.3, 0.4, 0.1,\
+                       0.5, 0.6, 1, 4,\
+                       0.1, 0.5, 0.2, 3,\
+                       0.9, 3, 0.1, 1]
+    # Set the correct URL
+    if sType == "vm":
+        url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/freq"
+    elif sType == "local":
+        # TESTING:
+        url = "http://localhost:6510/freq" 
     else:
-        # Use the REQUESTS.POST method
+        oBack['status'] = 'error'
+        return oBack
+    oBack['url'] = url
 
-        # headers = {'Content-type': 'application/json'}
-        # headers = {'User-Agent': 'Mozilla/5.0'}
-        # send the POST request
-        r = requests.post(url,data=params)
-        # Check the reply
-        if r.status_code != 500:
-            oBack['json'] = r.json()
-        else:
-            oBack['status'] = 'error'
-            oBack['html'] = r.text
+    params = {'nstylo-freqlist': json.dumps( oFreqs)}    # question
+
+    # Use the DRF method
+    params = {'table': json.dumps(oFreqs), 'owner': 'erwin'}
+    url = "http://localhost:6510/ntable" 
+    oResult = make_rest_request(url,params)
+    if oResult == None:
+        oBack['status'] = 'error'
+    else:
+        oBack['status'] = 'ok'
+        oBack['json'] = oResult
     # Return what we have
     return oBack
 
