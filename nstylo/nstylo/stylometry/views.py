@@ -43,14 +43,6 @@ import nstylo.services
 conn = None
 paginateEntries = 20
 
-#if "\\" in STATIC_ROOT:
-#    resultDir = os.path.abspath(os.path.join(STATIC_ROOT.replace("\\nstylo\\","\\nstylo\\nstylo\\"), "results"))
-#else:
-#    resultDir = os.path.abspath(os.path.join(STATIC_ROOT, "results"))
-# resultDir = os.path.abspath(os.path.join(STATIC_ROOT, "results"))
-
-# resultDir = os.path.abspath(os.path.join(STATIC_ROOT))
-
 rFuncStr = """
     library(stylo)
     library(jsonlite)
@@ -223,7 +215,6 @@ def nlogin(request):
          'year':datetime.now().year,}
     return render(request,'nlogin.html',context)
 
-
 def demo(request):
     """Default page to show for the pyRserve demonstration"""
 
@@ -246,13 +237,10 @@ def doFDC(request):
     (seriesType, units) = (request.COOKIES["seriesType"], request.COOKIES["units"])
     filename = "%d_%s" % (random.randint(1000, 9999), "boxplot.png")
     R = getRConnection()
-    # resultFile = os.path.abspath(os.path.join(resultDir, filename))
-    # csv_file = os.path.abspath( os.path.join(MEDIA_ROOT, csv_file))
+    # Get the correct location on the server
     resultFile = os.path.abspath(os.path.join(MEDIA_ROOT, filename))
     R.renderer(resultFile, "Random data for site %s (%s)" % (siteName, units), units)
-    # Calculate where it is going to be 
-    # url = "/" + APP_PREFIX + "static/results/"+filename
-    # url = "/" + APP_PREFIX + "media/"+filename
+    # Calculate the correct URL to approache it
     url = MEDIA_URL + filename
     # THink of the context
     context = {'fdc_result_file': url}
@@ -334,80 +322,80 @@ def get_r_pca_reply(sTable):
         return oBack
     
 
-@method_decorator(csrf_exempt, name='dispatch')
-class NlabService(View):
-    # Initialisations
-    arErr = []              # Array of errors
-    oErr = ErrHandle()
-    step = "0" 
+#@method_decorator(csrf_exempt, name='dispatch')
+#class NlabService(View):
+#    # Initialisations
+#    arErr = []              # Array of errors
+#    oErr = ErrHandle()
+#    step = "0" 
 
-    data = {'status': 'ok', 'html': 'nlabservice is aan het werk'}       # Create data to be returned    
+#    data = {'status': 'ok', 'html': 'nlabservice is aan het werk'}       # Create data to be returned    
 
-    def post(self, request):
-        """ The POST option should be used mostly"""
+#    def post(self, request):
+#        """ The POST option should be used mostly"""
 
-        try:
-            # A POST request is the only possible way to access our NLAB services
-            self.oErr.Status("NlabService - POST 1")
-            params = request.POST
-            self.oErr.Status("NlabService - POST 2")
-            sList = params.get('nstylo-freqlist')
-            self.oErr.Status("NlabService - POST 3")
-            if sList == "" or sList == None:
-                list = {}
-                self.oErr.Status("NlabService - POST: nstylo-freqlist is empty")
-            else:
-                list = json.loads(sList)
+#        try:
+#            # A POST request is the only possible way to access our NLAB services
+#            self.oErr.Status("NlabService - POST 1")
+#            params = request.POST
+#            self.oErr.Status("NlabService - POST 2")
+#            sList = params.get('nstylo-freqlist')
+#            self.oErr.Status("NlabService - POST 3")
+#            if sList == "" or sList == None:
+#                list = {}
+#                self.oErr.Status("NlabService - POST: nstylo-freqlist is empty")
+#            else:
+#                list = json.loads(sList)
 
-            self.oErr.Status("NlabService - POST 4")
-            # Process the data in the LIST
-            self.data['html'] = self.process_data(list)
-            self.oErr.Status("NlabService - POST 5\n{}".format(self.data['html']))
-        except:
-            self.data['html'] = "an error has occurred in NlabService(View) at step {}: {}".format(self.step, self.oErr.get_error())
+#            self.oErr.Status("NlabService - POST 4")
+#            # Process the data in the LIST
+#            self.data['html'] = self.process_data(list)
+#            self.oErr.Status("NlabService - POST 5\n{}".format(self.data['html']))
+#        except:
+#            self.data['html'] = "an error has occurred in NlabService(View) at step {}: {}".format(self.step, self.oErr.get_error())
 
-        # Figure out what we are going to return
-        back = json.dumps(self.data)
-        self.oErr.Status("NlabService - POST 6")
+#        # Figure out what we are going to return
+#        back = json.dumps(self.data)
+#        self.oErr.Status("NlabService - POST 6")
 
-        # return JsonResponse(self.data)
-        return HttpResponse(back, "application/json")
+#        # return JsonResponse(self.data)
+#        return HttpResponse(back, "application/json")
 
-    def get(self, request):
-        """The GET option is used in some instances"""
+#    def get(self, request):
+#        """The GET option is used in some instances"""
 
-        self.oErr.Status("NlabService - GET")
-        query = request.GET
-        sList = query.get('nstylo-freqlist')
-        if sList == "":
-            list = {}
-        else:
-            list = json.loads(sList)
+#        self.oErr.Status("NlabService - GET")
+#        query = request.GET
+#        sList = query.get('nstylo-freqlist')
+#        if sList == "":
+#            list = {}
+#        else:
+#            list = json.loads(sList)
 
-        # Process the data in the LIST
-        self.data['html'] = self.process_data(list)
+#        # Process the data in the LIST
+#        self.data['html'] = self.process_data(list)
 
-        # Figure out what we are going to return
-        datadump = json.dumps(self.data)
-        if 'callback' in query:
-            callback = query.get('callback')
-            back = "{}({})".format(callback, datadump)
-        else:
-            back = datadump
-        return HttpResponse(back, "application/json")
+#        # Figure out what we are going to return
+#        datadump = json.dumps(self.data)
+#        if 'callback' in query:
+#            callback = query.get('callback')
+#            back = "{}({})".format(callback, datadump)
+#        else:
+#            back = datadump
+#        return HttpResponse(back, "application/json")
 
-    def process_data(self, list):
-        return "The data is not processed"
+#    def process_data(self, list):
+#        return "The data is not processed"
 
 
-class NlabTest(NlabService):
+#class NlabTest(NlabService):
     
-    def process_data(self, list):
-        oBack = get_r_reply(list, "analyze")
-        if oBack['status'] == 'ok':
-            return oBack['response']
-        else:
-            return ""
+#    def process_data(self, list):
+#        oBack = get_r_reply(list, "analyze")
+#        if oBack['status'] == 'ok':
+#            return oBack['response']
+#        else:
+#            return ""
 
 
 class NlabInfo(View):
@@ -477,6 +465,13 @@ class NlabTableDetail(APIView):
         serializer = FreqTableSerializer(ftables, many=True)
         return Response(serializer.data)
     
+    def get(self, request, pk, format=None):
+        """Retrieve one particular frequency table"""
+
+        ftable = self.get_object(pk)
+        ftable = FreqTableSerializer(ftable)
+        return Response(ftable.data)
+
     def post(self, request, format=None):
         """Create a new FreqTable object"""
 
@@ -526,13 +521,6 @@ class NlabTableDetail(APIView):
             self.oErr.DoError("NlabTableDetail.post")
             # Getting here means that the data was not valid
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request, pk, format=None):
-        """Retrieve one particular frequency table"""
-
-        ftable = self.get_object(pk)
-        ftable = FreqTableSerializer(ftable)
-        return Response(ftable.data)
 
     def delete(self, request, pk, format=None):
         """Delete one particular frequency table"""

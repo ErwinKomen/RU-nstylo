@@ -46,42 +46,48 @@ var ru = (function ($, ru) {
     // Public methods
     return {
 
-      /**
-       *  addGraph
-       *      Add a graph at sLocation
-       *
-       */
-      addGraph: function (sLocation) {
-        var chart = null,
-            svg = null;
+        /**
+        *  addGraph
+        *      Add a graph at sLocation
+        *
+        */
+        addGraph: function (sLocation) {
+            var chart = null,
+                svg = null;
 
-        try {
-          // Find out what the location is
-          svg = $("#" + sLocation).find("svg");
+            try {
+                // Find out what the location is
+                svg = $("#" + sLocation).find("svg");
 
-          chart = nv.models.discreteBarChart()
-        } catch (ex) {
-          private_methods.errMsg("addGraph", ex);
-        }
-      },
+                chart = nv.models.discreteBarChart()
+            } catch (ex) {
+                private_methods.errMsg("addGraph", ex);
+            }
+        },
 
-      /**
-       *  gettabledata
-       *      Get JSON table data by calling the URL
-       *
-       */
-      gettabledata: function (sUrl) {
-        var result = null;
+        /**
+        *  gettabledata
+        *      Get JSON table data by calling the URL
+        *
+        *  NOTE: this function is not really used
+        */
+        gettabledata: function (sUrl) {
+            var result = null;
 
-        $.post(sUrl, function (data) {
-          result = data;
-        });
+            $.post(sUrl, function (data) {
+                result = data;
+            });
 
-        // Return what we found
-        return result;
-      },
+            // Return what we found
+            return result;
+        },
 
-      selectSite: function () {
+        /**
+         *  selectSite
+         *      Select the site for the DEMO function
+         *
+         */
+        selectSite: function () {
         var sDivSeries = "#id_series",
             sDivSite = "#id_site",
             sDivPlot = "#plot_div",
@@ -109,9 +115,14 @@ var ru = (function ($, ru) {
                 $(sDivDeath).html(response.responseText);
             }
         });
-      },
+        },
 
-      doJobby : function() {
+        /**
+         *  doJobby
+         *      Perform DEMO jbo
+         *
+         */
+        doJobby: function () {
         var sDivSeries = "#id_series",
             sDivSite = "#id_site",
             sDivPlot = "#plot_div",
@@ -133,102 +144,98 @@ var ru = (function ($, ru) {
                 $(sDivPlot).html("");
             }
         });
-      },
+        },
+        
+        /**
+        *  showtabledata
+        *      Get data from [sUrl] and show it in location [sDiv]
+        *
+        */
+        showtabledata: function (sUrl, sDiv) {
+            var svg = null,
+                result = null,  // 
+                oTable = null,  // Just the table
+                oThat = null;
+
+            try {
+                // Find out where to put it
+                svg = d3.select(sDiv)
+                        .append("svg")
+                        .attr("width", 300)
+                        .attr("height", 200)
+                        .attr("transform", "translate(100,300)");
+                // Make a POST call to get the data
+                $.post(sUrl, function (oFreqData) {
+                // Get the table from here
+                oTable = oFreqData['table'];
+                // Show the table
+                svg.selectAll("circle")
+                    .data(oTable)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", 4)
+                    .attr("cy", 2)
+                    .attr("r", 5);
+                // We now have the data: show it
+                result = oFreqData;
+                });
+                // Function doesn't return anything
+            } catch (ex) {
+                private_methods.errMsg("showtabledata", ex);
+            }
+        },
+
+        /**
+        *  ftableshow
+        *      Show the definition of a frequency table
+        *
+        */
+        ftableshow: function (el) {
+            var elTr = null;
+
+            try {
+                // Get to the nearest <tr>
+                elTr = $(el).closest("tr");
+                // Get to the next row
+                elTr = $(elTr).next(".ftable-details");
+                // Check its status
+                if ($(elTr).hasClass("hidden")) {
+                // Hide all other [function-details]
+                $(elTr).closest("table").find(".ftable-details").addClass("hidden");
+                // It's hidden, so open it
+                $(elTr).removeClass("hidden");
+                } else {
+                // It's open, so close it
+                $(elTr).addClass("hidden");
+                }
 
 
+            } catch (ex) {
+                private_methods.errMsg("ftableshow", ex);
+            }
+        },
 
-      /**
-       *  showtabledata
-       *      Get data from [sUrl] and show it in location [sDiv]
-       *
-       */
-      showtabledata: function (sUrl, sDiv) {
-        var svg = null,
-            result = null,  // 
-            oTable = null,  // Just the table
-            oThat = null;
+        /**
+        *  part_detail_toggle
+        *      Toggle part detail
+        *
+        */
+        part_detail_toggle: function (iPk) {
+            var sId = "";
 
-        try {
-          // Find out where to put it
-          svg = d3.select(sDiv)
-                  .append("svg")
-                  .attr("width", 300)
-                  .attr("height", 200)
-                  .attr("transform", "translate(100,300)");
-          // Make a POST call to get the data
-          $.post(sUrl, function (oFreqData) {
-            // Get the table from here
-            oTable = oFreqData['table'];
-            // Show the table
-            svg.selectAll("circle")
-              .data(oTable)
-              .enter()
-              .append("circle")
-              .attr("cx", 4)
-              .attr("cy", 2)
-              .attr("r", 5);
-            // We now have the data: show it
-            result = oFreqData;
-          });
-          // Function doesn't return anything
-        } catch (ex) {
-          private_methods.errMsg("showtabledata", ex);
+            // validate
+            if (iPk === undefined) return;
+            // Get the name of the tag
+            sId = "#part_details_" + iPk.toString();
+            // Check if it is visible or not
+            if ($(sId).hasClass("hidden")) {
+                // Remove it
+                $(sId).removeClass("hidden");
+            } else {
+                // Add it
+                $(sId).addClass("hidden");
+            }
         }
-      },
-
-      /**
-       *  ftableshow
-       *      Show the definition of a frequency table
-       *
-       */
-      ftableshow: function (el) {
-        var elTr = null;
-
-        try {
-          // Get to the nearest <tr>
-          elTr = $(el).closest("tr");
-          // Get to the next row
-          elTr = $(elTr).next(".ftable-details");
-          // Check its status
-          if ($(elTr).hasClass("hidden")) {
-            // Hide all other [function-details]
-            $(elTr).closest("table").find(".ftable-details").addClass("hidden");
-            // It's hidden, so open it
-            $(elTr).removeClass("hidden");
-          } else {
-            // It's open, so close it
-            $(elTr).addClass("hidden");
-          }
-
-
-        } catch (ex) {
-          private_methods.errMsg("ftableshow", ex);
-        }
-      },
-
-
-
-      /**
-       *  part_detail_toggle
-       *      Toggle part detail
-       *
-       */
-      part_detail_toggle: function (iPk) {
-        var sId = "";
-
-        // validate
-        if (iPk === undefined) return;
-        // Get the name of the tag
-        sId = "#part_details_" + iPk.toString();
-        // Check if it is visible or not
-        if ($(sId).hasClass("hidden")) {
-          // Remove it
-          $(sId).removeClass("hidden");
-        } else {
-          // Add it
-          $(sId).addClass("hidden");
-        }
-      }
 
     };
   }($, ru.config));

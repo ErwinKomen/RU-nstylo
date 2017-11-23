@@ -4,7 +4,6 @@ import sys
 import requests
 import urllib
 from nstylo.utils import ErrHandle
-# from nstylo.stylometry.views import NlabTableDetail
 
 # Set the method
 sMethod = "rest"
@@ -30,11 +29,9 @@ def get_information(sType):
         # Set the correct URL
         # Use the DRF method
         if sType == "vm":
-            # url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/freq"
             url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/ntable"
         elif sType == "local":
             # TESTING:
-            # url = "http://localhost:6510/freq" 
             url = "http://localhost:6510/ntable" 
         else:
             oBack['status'] = 'error'
@@ -58,10 +55,12 @@ def get_information(sType):
         oBack['status'] = 'error'
         oBack['html'] = "get_information gives an error"
         return oBack
-
-
+    
 def make_post_request(sUrl, oData):
-    """Make a POST request to a service and return the data in a JSON object"""
+    """Make a POST request to a service and return the data in a JSON object
+    
+    NOTE: this function is *NOT* actually used, but the make_rest_request is used instead.
+    """
 
     oErr = ErrHandle()
     oResult = {}
