@@ -31,7 +31,7 @@ class ErrHandle:
         print("Error: "+msg+"\nSystem:", file=sys.stderr)
         for nErr in sys.exc_info():
             if (nErr != None):
-                print(nErr, file=sys.stderr)
+                print(str(nErr), file=sys.stderr)
         # Is this a fatal error that requires exiting?
         if (bExit):
             sys.exit(2)
@@ -40,6 +40,6 @@ class ErrHandle:
         lBack = []
         for nErr in sys.exc_info():
             if (nErr != None):
-                lBack.append(nErr)
+                lBack.append(str(nErr))
         return json.dumps(lBack)
 

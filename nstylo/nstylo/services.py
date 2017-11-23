@@ -12,41 +12,53 @@ sMethod = "rest"
 def get_information(sType):
     """Receive information"""
 
+    oErr = ErrHandle()
     oBack = {'status': 'ok'}
-    # Create an object that can be processed
-    oFreqs = {}
-    lColumnHeaders = [ 'aap', 'noot', 'mies', 'erwin' ]
-    lRowHeaders = ['met', 'een', 'gezwinde', 'spoed']
-    oFreqs['nrows'] = len(lRowHeaders)
-    oFreqs['ncols'] = len(lColumnHeaders)
-    oFreqs['table'] = [0.2, 0.3, 0.4, 0.1,\
-                       0.5, 0.6, 1, 4,\
-                       0.1, 0.5, 0.2, 3,\
-                       0.9, 3, 0.1, 1]
-    # Set the correct URL
-    if sType == "vm":
-        url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/freq"
-    elif sType == "local":
-        # TESTING:
-        url = "http://localhost:6510/freq" 
-    else:
-        oBack['status'] = 'error'
+    try:
+        # Create an object that can be processed
+        oFreqs = {}
+        lColumnHeaders = [ 'aap', 'noot', 'mies', 'erwin' ]
+        lRowHeaders = ['met', 'een', 'gezwinde', 'spoed']
+        oFreqs['rowheaders'] = lRowHeaders
+        oFreqs['columnheaders'] = lColumnHeaders
+        oFreqs['nrows'] = len(lRowHeaders)
+        oFreqs['ncols'] = len(lColumnHeaders)
+        oFreqs['table'] = [0.2, 0.3, 0.4, 0.1,\
+                           0.5, 0.6, 1, 4,\
+                           0.1, 0.5, 0.2, 3,\
+                           0.9, 3, 0.1, 1]
+        # Set the correct URL
+        # Use the DRF method
+        if sType == "vm":
+            # url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/freq"
+            url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/ntable"
+        elif sType == "local":
+            # TESTING:
+            # url = "http://localhost:6510/freq" 
+            url = "http://localhost:6510/ntable" 
+        else:
+            oBack['status'] = 'error'
+            return oBack
+
+        params = {'table': json.dumps(oFreqs), 'owner': 'erwin'}
+        oResult = make_rest_request(url,params)
+        if oResult == None:
+            oBack['status'] = 'error'
+        elif oResult['status'] == 'error':
+            oBack['html'] = oResult['msg']
+            oBack['status'] = 'error'
+        else:
+            oBack['status'] = 'ok'
+            oBack['json'] = oResult['json']
+        oBack['url'] = url
+        # Return what we have
         return oBack
-    oBack['url'] = url
-
-    params = {'nstylo-freqlist': json.dumps( oFreqs)}    # question
-
-    # Use the DRF method
-    params = {'table': json.dumps(oFreqs), 'owner': 'erwin'}
-    url = "http://localhost:6510/ntable" 
-    oResult = make_rest_request(url,params)
-    if oResult == None:
+    except:
+        oErr.DoError("get_information")      
         oBack['status'] = 'error'
-    else:
-        oBack['status'] = 'ok'
-        oBack['json'] = oResult
-    # Return what we have
-    return oBack
+        oBack['html'] = "get_information gives an error"
+        return oBack
+
 
 def make_post_request(sUrl, oData):
     """Make a POST request to a service and return the data in a JSON object"""
@@ -86,15 +98,15 @@ def make_post_request(sUrl, oData):
             oErr.Status('URLopen URL error: {}\ndata: {}\n url: {}\n'.format(
                 e.reason, str(data), strUrl))
         except:
-            description = sys.exc_info()[1]
-            oErr.DoError(description)      
+            # description = sys.exc_info()[1]
+            oErr.DoError("make_post_request")      
             return None
 
         # Return the result
         return oResult
     except:
-        description = sys.exc_info()[1]
-        oErr.DoError(description)      
+        # description = sys.exc_info()[1]
+        oErr.DoError("make_post_request")      
         return None
 
 def make_rest_request(sUrl, oData):
@@ -102,6 +114,7 @@ def make_rest_request(sUrl, oData):
 
     oErr = ErrHandle()
     oResult = {}
+    oResult['status'] = 'ok'
 
     try:
         # Make a POST request
@@ -119,6 +132,8 @@ def make_rest_request(sUrl, oData):
         # Return the result
         return oResult
     except:
-        description = sys.exc_info()[1]
-        oErr.DoError(description)      
-        return None
+        oErr.DoError("make_rest_request")  
+        oResult['status'] = 'error' 
+        oResult['msg'] = "make_rest_request error"   
+        oResult['json'] = {}
+        return oResult
