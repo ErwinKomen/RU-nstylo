@@ -4,6 +4,7 @@
 var jQuery = django.jQuery;
 var $ = jQuery;
 
+
 var ru = (function ($, ru) {
   "use strict";
 
@@ -26,7 +27,20 @@ var ru = (function ($, ru) {
       errMsg: function (sMsg, ex) {
         var sHtml = "Error in [" + sMsg + "]<br>" + ex.message;
         $("#" + loc_divErr).html(sHtml);
+      },
+      disable: function (element) {
+          element = $(element);
+          element.disabled = true;
+          return element;
+      },
+
+      enable: function (element) {
+          element = $(element);
+          element.removeAttr("disabled");
+          // element.disabled = false;
+          return element;
       }
+
     }
 
     // Public methods
@@ -66,6 +80,62 @@ var ru = (function ($, ru) {
         // Return what we found
         return result;
       },
+
+      selectSite: function () {
+        var sDivSeries = "#id_series",
+            sDivSite = "#id_site",
+            sDivPlot = "#plot_div",
+            sDivDeath = "#div_of_death";
+
+        if ($(sDivSeries).val() == '') {
+            $(sDivDeath).html("");
+            $(sDivSite).html("");
+            private_methods.disable(sDivSite);
+            $(sDivPlot).html("");
+            return;
+        }
+        $(sDivSite).html("");
+        private_methods.disable(sDivSite);
+        $(sDivPlot).html("");
+        new Ajax.Request('getSites', {
+            method:"get",
+            parameters: "value=" + $(sDivSeries).val(),
+            onSuccess: function(response) {
+                $(sDivDeath).html("");
+                $(sDivSite).html(response.responseText);
+                private_methods.enable(sDivSite);
+            },
+            onFailure: function(response) {
+                $(sDivDeath).html(response.responseText);
+            }
+        });
+      },
+
+      doJobby : function() {
+        var sDivSeries = "#id_series",
+            sDivSite = "#id_site",
+            sDivPlot = "#plot_div",
+            sDivDeath = "#div_of_death";
+
+        if ($(sDivSite).value == '') {
+            $(sDivPlot).html("");
+            return;
+        }            
+        new Ajax.Request('doFDC', {
+            method:"get",
+            parameters: "value=" + $(sDivSite).val(),
+            onSuccess: function(response) {
+                $(sDivDeath).html("");
+                $(sDivPlot).html(response.responseText);
+            },
+            onFailure: function(response) {
+                $(sDivDeath).html(response.responseText);
+                $(sDivPlot).html("");
+            }
+        });
+      },
+
+
 
       /**
        *  showtabledata

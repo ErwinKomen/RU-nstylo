@@ -24,6 +24,6 @@ class MainForm(forms.Form):
     # seriesTypes = map(lambda x: ("%s_%s" % (x[0], x[1]), "%s (%s)" % (x[0], x[1])), seriesTypes)
     seriesTypes = list(map(lambda x: ("%s_%s" % (x[0], x[1]), "%s (%s)" % (x[0], x[1])), seriesTypes))
     seriesTypes.insert(0, ('', 'please select a series type'))
-    series = forms.ChoiceField(choices=seriesTypes, widget=forms.Select(attrs={'onchange': 'selectSite()'}))
-    site = forms.ChoiceField(widget=forms.Select(attrs={'onchange': 'doJobby()', 'disabled': 'disabled'}))
+    series = forms.ChoiceField(choices=seriesTypes, widget=forms.Select(attrs={'onchange': 'ru.nstylo.selectSite()'}))
+    site = forms.ChoiceField(widget=forms.Select(attrs={'onchange': 'ru.nstylo.doJobby()', 'disabled': 'disabled'}))
 

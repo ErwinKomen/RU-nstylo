@@ -18,17 +18,17 @@ from django.contrib import admin
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/database/"))
 RESULTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../writable/results/"))
+MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../../writable/media/"))
 if "RU-nstylo\\writable" in WRITABLE_DIR:
     # Need another string
     WRITABLE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/database/"))
     RESULTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/results/"))
+    MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../../../writable/media/"))
 
 APP_PREFIX = "/"
-# STATICDIR = "/"
 if ("d:" in WRITABLE_DIR or "D:" in WRITABLE_DIR) and (not os.path.exists(os.path.abspath(os.path.join(WRITABLE_DIR, "erwin")))):
-    APP_PREFIX =  "nlab/"           # WAS:    ""
-    admin.site.site_url = '/nlab'   # WAS:    '/'
-    # STATICDIR = "/Data Files/vs2010/projects/RU-nstylo/nstylo/nstylo/static"
+    APP_PREFIX =  ""            # WAS:    "nlab/"
+    admin.site.site_url = '/'   # WAS:    '/nlab'
 elif "/var/www" in WRITABLE_DIR:
     # New configuration of http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab
     APP_PREFIX = "nlab/"
@@ -138,7 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Amsterdam'
 
 USE_I18N = True
 
@@ -157,15 +157,9 @@ if ("/var/www" in WRITABLE_DIR) or True:
     MEDIA_URL = "/" + APP_PREFIX + "media/"
 
 STATIC_ROOT = os.path.abspath(os.path.join("/", posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))))
-MEDIA_ROOT = os.path.abspath(os.path.join("/", posixpath.join(*(BASE_DIR.split(os.path.sep) + ['media']))))
 
 
-        
-#STATICFILES_DIRS = [
-#    STATICDIR
+#STATICFILES_FINDERS = [
+#    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#    'django.contrib.staticfiles.finders.FileSystemFinder',
 #]
-
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-]

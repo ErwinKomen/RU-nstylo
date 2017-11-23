@@ -51,6 +51,7 @@ urlpatterns = [
     url(r'^info',         NlabInfo.as_view(),                         name='info'),
     url(r'^definitions$', RedirectView.as_view(url='/'+pfx+'admin/'), name='definitions'),
     url(r'^static/(?P<path>.*)$',django.views.static.serve, {'document_root': STATIC_ROOT}),
+    url(r'^media/(?P<path>.*)$', django.views.static.serve, {'document_root': nstylo.settings.MEDIA_ROOT}),
     url(r'^login/$',
         django.contrib.auth.views.login,
         {

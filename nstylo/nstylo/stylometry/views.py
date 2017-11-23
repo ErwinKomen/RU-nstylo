@@ -34,7 +34,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.decorators import api_view
 
 # NSTYLO
-from nstylo.settings import APP_PREFIX, RESULTS_DIR, STATIC_ROOT, MEDIA_ROOT
+from nstylo.settings import APP_PREFIX, RESULTS_DIR, STATIC_ROOT, MEDIA_ROOT, MEDIA_URL
 from nstylo.stylometry.models import *
 from nstylo.stylometry.forms import *
 from nstylo.utils import ErrHandle
@@ -43,10 +43,13 @@ import nstylo.services
 conn = None
 paginateEntries = 20
 
-if "\\" in STATIC_ROOT:
-    resultDir = os.path.abspath(os.path.join(STATIC_ROOT.replace("\\nstylo\\","\\nstylo\\nstylo\\"), "results"))
-else:
-    resultDir = os.path.abspath(os.path.join(STATIC_ROOT, "results"))
+#if "\\" in STATIC_ROOT:
+#    resultDir = os.path.abspath(os.path.join(STATIC_ROOT.replace("\\nstylo\\","\\nstylo\\nstylo\\"), "results"))
+#else:
+#    resultDir = os.path.abspath(os.path.join(STATIC_ROOT, "results"))
+# resultDir = os.path.abspath(os.path.join(STATIC_ROOT, "results"))
+
+# resultDir = os.path.abspath(os.path.join(STATIC_ROOT))
 
 rFuncStr = """
     library(stylo)
@@ -220,6 +223,7 @@ def nlogin(request):
          'year':datetime.now().year,}
     return render(request,'nlogin.html',context)
 
+
 def demo(request):
     """Default page to show for the pyRserve demonstration"""
 
@@ -242,10 +246,14 @@ def doFDC(request):
     (seriesType, units) = (request.COOKIES["seriesType"], request.COOKIES["units"])
     filename = "%d_%s" % (random.randint(1000, 9999), "boxplot.png")
     R = getRConnection()
-    resultFile = os.path.abspath(os.path.join(resultDir, filename))
+    # resultFile = os.path.abspath(os.path.join(resultDir, filename))
+    # csv_file = os.path.abspath( os.path.join(MEDIA_ROOT, csv_file))
+    resultFile = os.path.abspath(os.path.join(MEDIA_ROOT, filename))
     R.renderer(resultFile, "Random data for site %s (%s)" % (siteName, units), units)
     # Calculate where it is going to be 
-    url = "/" + APP_PREFIX + "static/results/"+filename
+    # url = "/" + APP_PREFIX + "static/results/"+filename
+    # url = "/" + APP_PREFIX + "media/"+filename
+    url = MEDIA_URL + filename
     # THink of the context
     context = {'fdc_result_file': url}
     # Render the little piece of HTML that is going to be returned
@@ -584,6 +592,10 @@ class FreqtableDetailView(DetailView):
         # Simply show the detailed view
         return self.render_to_response(context)
 
+    def get_object(self, queryset = None):
+        obj = super().get_object(queryset)
+        return obj
+
     def get_context_data(self, **kwargs):
         context = super(FreqtableDetailView, self).get_context_data(**kwargs)
         context['now'] = timezone.now()
@@ -594,23 +606,27 @@ class FreqtableDetailView(DetailView):
         """Turn the table into a stylo-type 'table_with_frequencies.txt'"""
 
         # Get access to the table
-        lTable = json.loads( self.object.table)
+        oFtable = json.loads( self.object.table)
         sFileName = "table_with_frequencies.txt"
         lResult = []
         # Process the header row
-        lHeader = []
-        for item in lTable[0]:
-            if item != "":
-                lHeader.append('"{}"'.format(item))
+        lHeader = oFtable['columnheaders']
+        #for item in lTable[0]:
+        #    if item != "":
+        #        lHeader.append('"{}"'.format(item))
         lResult.append(" ".join(lHeader))
         # Process all the remaining lines
-        for idx in range(1, len(lTable)):
-            lLine = lTable[idx]
+        lRows = oFtable['rowheaders']
+        lTable = oFtable['table']
+        i = 0
+        for idx in range(0, len(lRows)):
+            # Start a row and add the row header
             lRow = []
-            lRow.append('"{}"'.format(lLine[0]))
-            for j in range(1, len(lLine)):
+            lRow.append('"{}"'.format(lRows[idx]))
+            for j in range(0, len(lHeader)):
                 # This is a floating point number
-                lRow.append("{}".format(lLine[j]))
+                lRow.append("{}".format(lTable[i]))
+                i+=1
             lResult.append(" ".join(lRow))
         # Now turn the result list into a string
         sResult = "\n".join(lResult)
@@ -625,16 +641,9 @@ class FreqtableDetailView(DetailView):
         """Turn the table into a stylo-type 'wordlist.txt'"""
 
         # Get access to the table
-        lTable = json.loads( self.object.table)
+        oFtable = json.loads( self.object.table)
         sFileName = "wordlist.txt"
-        lResult = []
-        # Process all the remaining lines
-        for idx in range(1, len(lTable)):
-            lLine = lTable[idx]
-            lRow = []
-            # lResult.append('"{}"'.format(lLine[0]))
-            lResult.append(lLine[0])
-        # Now turn the result list into a string
+        lResult = oFtable['rowheaders']
         sResult = "\n".join(lResult)
         # Build the result
         response = HttpResponse(sResult, content_type='text/csv')
