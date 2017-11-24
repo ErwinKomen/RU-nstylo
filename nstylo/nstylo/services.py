@@ -4,67 +4,63 @@ import sys
 import requests
 import urllib
 from nstylo.utils import ErrHandle
-# from nstylo.stylometry.views import NlabTableDetail
 
 # Set the method
 sMethod = "rest"
 
-def get_information():
+def get_information(sType):
     """Receive information"""
 
-    # Create a list of lists
-    lFreqs = []
-    oHeader = [ ['aap'], ['noot'], ['mies'], ['erwin'] ] 
-    lFreqs.append(oHeader)
-    oData = [[3],     [4],      [5], [6]     ]
-    lFreqs.append(oData)
-    oData = [[7],     [8],      [9], [2]     ]
-    lFreqs.append(oData)
-    # Set the correct URL
-    url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/freq"
-    # TESTING:
-    # url = "http://localhost/nlab/freq"
-    url = "http://localhost:6401/freq" 
-
-    params = {'nstylo-freqlist': json.dumps( lFreqs)}    # question
+    oErr = ErrHandle()
     oBack = {'status': 'ok'}
-
-    if sMethod == "urllib":
-        # Use the URLLIB method
-        oResult = make_post_request(url, params)
-        if oResult == None:
-            oBack['status'] = 'error'
-        else:
-            oBack['status'] = 'ok'
-            oBack['json'] = oResult
-    elif sMethod == "rest":
+    try:
+        # Create an object that can be processed
+        oFreqs = {}
+        lColumnHeaders = [ 'aap', 'noot', 'mies', 'erwin' ]
+        lRowHeaders = ['met', 'een', 'gezwinde', 'spoed']
+        oFreqs['rowheaders'] = lRowHeaders
+        oFreqs['columnheaders'] = lColumnHeaders
+        oFreqs['nrows'] = len(lRowHeaders)
+        oFreqs['ncols'] = len(lColumnHeaders)
+        oFreqs['table'] = [0.2, 0.3, 0.4, 0.1,\
+                           0.5, 0.6, 1, 4,\
+                           0.1, 0.5, 0.2, 3,\
+                           0.9, 3, 0.1, 1]
+        # Set the correct URL
         # Use the DRF method
-        params = {'table': json.dumps(lFreqs), 'owner': 'erwin'}
-        url = "http://localhost:6401/ntable" 
+        if sType == "vm":
+            url = "http://corpus-studio-web.cttnww-meertens.surf-hosted.nl/nlab/ntable"
+        elif sType == "local":
+            # TESTING:
+            url = "http://localhost:6510/ntable" 
+        else:
+            oBack['status'] = 'error'
+            return oBack
+
+        params = {'table': json.dumps(oFreqs), 'owner': 'erwin'}
         oResult = make_rest_request(url,params)
         if oResult == None:
             oBack['status'] = 'error'
+        elif oResult['status'] == 'error':
+            oBack['html'] = oResult['msg']
+            oBack['status'] = 'error'
         else:
             oBack['status'] = 'ok'
-            oBack['json'] = oResult
-    else:
-        # Use the REQUESTS.POST method
-
-        # headers = {'Content-type': 'application/json'}
-        # headers = {'User-Agent': 'Mozilla/5.0'}
-        # send the POST request
-        r = requests.post(url,data=params)
-        # Check the reply
-        if r.status_code != 500:
-            oBack['json'] = r.json()
-        else:
-            oBack['status'] = 'error'
-            oBack['html'] = r.text
-    # Return what we have
-    return oBack
-
+            oBack['json'] = oResult['json']
+        oBack['url'] = url
+        # Return what we have
+        return oBack
+    except:
+        oErr.DoError("get_information")      
+        oBack['status'] = 'error'
+        oBack['html'] = "get_information gives an error"
+        return oBack
+    
 def make_post_request(sUrl, oData):
-    """Make a POST request to a service and return the data in a JSON object"""
+    """Make a POST request to a service and return the data in a JSON object
+    
+    NOTE: this function is *NOT* actually used, but the make_rest_request is used instead.
+    """
 
     oErr = ErrHandle()
     oResult = {}
@@ -101,15 +97,15 @@ def make_post_request(sUrl, oData):
             oErr.Status('URLopen URL error: {}\ndata: {}\n url: {}\n'.format(
                 e.reason, str(data), strUrl))
         except:
-            description = sys.exc_info()[1]
-            oErr.DoError(description)      
+            # description = sys.exc_info()[1]
+            oErr.DoError("make_post_request")      
             return None
 
         # Return the result
         return oResult
     except:
-        description = sys.exc_info()[1]
-        oErr.DoError(description)      
+        # description = sys.exc_info()[1]
+        oErr.DoError("make_post_request")      
         return None
 
 def make_rest_request(sUrl, oData):
@@ -117,6 +113,7 @@ def make_rest_request(sUrl, oData):
 
     oErr = ErrHandle()
     oResult = {}
+    oResult['status'] = 'ok'
 
     try:
         # Make a POST request
@@ -134,6 +131,8 @@ def make_rest_request(sUrl, oData):
         # Return the result
         return oResult
     except:
-        description = sys.exc_info()[1]
-        oErr.DoError(description)      
-        return None
+        oErr.DoError("make_rest_request")  
+        oResult['status'] = 'error' 
+        oResult['msg'] = "make_rest_request error"   
+        oResult['json'] = {}
+        return oResult

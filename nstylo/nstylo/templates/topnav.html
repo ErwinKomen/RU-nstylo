@@ -28,7 +28,8 @@
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
                          aria-haspopup="true" aria-expanded="false">Tools <span class="caret"></span></a>
                       <ul class="dropdown-menu">
-                        <li><a href="{% url 'info' %}">Info</a></li>
+                        <li><a href="{% url 'info' path="local" %}">Info - Radboud</a></li>
+                        <li><a href="{% url 'info' path="vm" %}">Info - VM</a></li>
                         <li><a href="{% url 'ftable_list' %}">Frequency tables</a></li>
                       </ul>
                     </li>

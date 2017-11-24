@@ -1,48 +1,6 @@
 {% extends "layout.html" %}
 
 {% block header_content %}
-<script type="text/javascript">
-    function selectSite() {
-        if ($("id_series").value == '') {
-            $("div_of_death").update("");
-            $("id_site").update("").disable();
-            $("plot_div").update("");
-            return;
-        }
-        $("id_site").update("").disable();
-        $("plot_div").update("");
-        new Ajax.Request('getSites', {
-		        method:"get",
-            parameters: "value=" + $("id_series").value,
-            onSuccess: function(response) {
-                $("div_of_death").update("");
-                $("id_site").update(response.responseText);
-                $("id_site").enable();
-            },
-            onFailure: function(response) {
-                $("div_of_death").update(response.responseText);
-            }
-        });
-    }
-    function doJobby() {
-        if ($("id_site").value == '') {
-            $("plot_div").update("");
-            return;
-        }            
-        new Ajax.Request('doFDC', {
-            method:"get",
-            parameters: "value=" + $("id_site").value,
-            onSuccess: function(response) {
-                $("div_of_death").update("");
-                $("plot_div").update(response.responseText);
-            },
-            onFailure: function(response) {
-                $("div_of_death").update(response.responseText);
-                $("plot_div").update("");
-            }
-        });
-    }  
-</script>
 {% endblock %}
 
 {% block content %}
