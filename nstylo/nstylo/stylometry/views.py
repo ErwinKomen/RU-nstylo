@@ -108,6 +108,46 @@ rFuncStr = """
         return (jsonlite::toJSON(oBack))
     }
 
+    clusterAnalysis <- function(sTable) {
+
+        # Convert input
+        oTable <- jsonObjectToTable(sTable)
+
+        # Run stylo on the transformed versino of [oTable]
+        result <- stylo(frequencies=t(oTable), analysis.type="CA", gui=FALSE, 
+                        write.png.file = TRUE, write.svg.file = TRUE,
+                        custom.graph.filename="cesar_ca")
+        # Note: the resulting PNG is written in a file cesar_ca_nnn.png
+        #       where "nnn" is a consecutive number
+        # Directory: see getwd()
+
+        # Get the SVG file that has been made
+        files <- list.files(pattern="cesar_ca.*svg")
+        file <- files[1]
+        content <- readLines(file)
+        svg <- content[2:length(content)]
+
+        # Assuming there are results: return the CA information
+        # Note: we want numerical results to draw the DENDROGRAM ourselves
+        
+        # The distance table provides the distances between each two author/text combinations
+        dt <- result$distance.table
+
+        # The 'list of edges' contains all the information needed to create a dendrogram
+        loe <- result$list.of.edges
+
+        oBack <- list(
+                 dt_table=dt, 
+                 dt_rownames=row.names(dt), 
+                 dt_colnames=names(as.data.frame(dt)),
+                 loe_table=loe, 
+                 loe_rownames=row.names(loe), 
+                 loe_colnames=names(as.data.frame(loe)),
+                 svg=svg
+                 )
+        return (jsonlite::toJSON(oBack))
+    }
+
 
 """
 
@@ -317,6 +357,58 @@ def get_r_pca_reply(sTable):
         return oBack
     except:
         msg = oErr.DoError("get_r_pca_reply error: ")
+        oBack['status'] = 'error'
+        oBack['response'] = msg
+        return oBack
+    
+def get_r_cluster_reply(sTable):
+    """Perform a CLUSTER ANALYSIS in R on the data in [sTable]"""
+
+    oBack = {'status': 'ok', 'response': ''}
+    prefixes = ['dt_', 'loe_']
+    oErr = ErrHandle()
+    try:
+        # Get an R connection
+        connThis = getRConnObject()
+        if connThis == None:
+            oBack['status'] = 'error'
+            oBack['response'] = "Rserve is probably not running"
+            return oBack
+
+        # Let 'R' convert the table into a data frame
+        connThis.r.dfTable = connThis.r.jsonObjectToTable(sTable)
+
+        # Let R perform 'stylo' CA directly on [sTable]
+        sResult = connThis.r.clusterAnalysis(sTable)
+        oResult = json.loads(sResult[0])
+
+        # The results contain a dt and loe table with their row and column names
+
+        # Adapt the resulting table with the information in object oResult
+        for prefix in prefixes:
+            lTable = []
+            lRow = ['']
+            for hdr in oResult[prefix+'colnames']:
+                lRow.append(hdr)
+            lTable.append(lRow)
+            for idx in range(0, len(oResult[prefix+'rownames'])):
+                lRow = []
+                lRow.append(oResult[prefix+'rownames'][idx])
+                for cell in oResult[prefix+'table'][idx]:
+                    lRow.append(cell)
+                lTable.append(lRow)
+                    
+            # Add the full table 
+            oResult[prefix+'fulltable'] = lTable
+
+        nCols = len(oResult[prefixes[0]+'colnames'])
+
+        oBack['contents'] = oResult
+        oBack['response'] = "get_r_cluster_reply: I have cluster information of {} items".format(nCols)
+        # Return what we made
+        return oBack
+    except:
+        msg = oErr.DoError("get_r_cluster_reply error: ")
         oBack['status'] = 'error'
         oBack['response'] = msg
         return oBack
@@ -577,11 +669,23 @@ class FreqtableDetailView(DetailView):
             # Check the response and make it available
             context['status'] = oResponse['status']
             if oResponse['status'] == "ok":
-                context['r_response'] = oResponse['response']
+                context['r_pca_response'] = oResponse['response']
                 # Get the PCA coordinates
-                context['r_contents'] = oResponse['contents']
+                context['r_pca_contents'] = oResponse['contents']
                 # Make sure to store these results in the appropriate object
                 self.object.set_pca(oResponse['contents'])
+        elif sType == "cluster":
+            # This is a CLUSTER ANALYSIS
+            oResponse = get_r_cluster_reply(self.object.table)
+            # Check the response and make it available
+            context['status'] = oResponse['status']
+            if oResponse['status'] == "ok":
+                context['r_ca_response'] = oResponse['response']
+                # Get the PCA coordinates
+                context['r_ca_contents'] = oResponse['contents']
+                # Make sure to store these results in the appropriate object
+                self.object.set_ca(oResponse['contents'])
+            
 
         # Simply show the detailed view
         return self.render_to_response(context)

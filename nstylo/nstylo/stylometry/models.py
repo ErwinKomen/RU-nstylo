@@ -12,6 +12,8 @@ class FreqTable(models.Model):
     owner = models.CharField("User name", default="anonymous", max_length=MAX_USERNAME)
     # [0-1] PCA information
     pca = models.TextField(blank=True, null=True)
+    # [0-1] CA (cluster analysis) information
+    ca = models.TextField(blank=True, null=True)
 
     def set_pca(self, oPcaInfo):
         # Store the results as a string
@@ -26,6 +28,22 @@ class FreqTable(models.Model):
         else:
             # Return an empty object
             return {}
+
+    def set_ca(self, oCaInfo):
+        # Store the results as a string
+        self.ca = json.dumps( oCaInfo)
+        self.save()
+
+    def get_ca(self):
+        sCaInfo = self.ca
+        if sCaInfo != None and sCaInfo != "":
+            # Return the object representation of the results
+            return json.loads(sCaInfo)
+        else:
+            # Return an empty object
+            return {}
+
+
 
 
 class FreqTableSerializer(serializers.ModelSerializer):

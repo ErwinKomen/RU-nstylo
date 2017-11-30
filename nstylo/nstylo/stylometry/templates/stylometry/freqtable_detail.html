@@ -36,41 +36,84 @@
       {% if status %}
         <div class="row">Status: {{status}}</div>
 
-        <!-- Process a response -->
-        {% if r_response %}
-          <div class="row">R response: {{r_response}}</div>
+        <!-- Process a PCA response -->
+        {% if r_pca_response %}
+          <div class="row">R response on PCA: {{r_pca_response}}</div>
+          <!-- Show the contents -->
+          {% if r_pca_contents %}
+            <div class="row">
+              <h4>PCA coordinates:</h4>
+              <table>
+                <thead>
+                  <tr>
+                    {% for colheading in r_pca_contents.colnames %}
+                    <th>{{colheading}}</th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in r_pca_contents.fulltable %}
+                  {% if not forloop.first %}
+                  <tr>
+                    {% for cell in row %}
+                      <td>{{cell}}</td>
+                    {% endfor %}
+                  </tr>
+                  {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
         {% endif %}
 
-        <!-- Show the contents -->
-        {% if r_contents %}
-          <div class="row">
-            <h4>PCA coordinates:</h4>
-            <table>
-              <thead>
-                <tr>
-                  {% for colheading in r_contents.colnames %}
-                  <th>{{colheading}}</th>
+        <!-- Process a CA response -->
+        {% if r_ca_response %}
+          <div class="row">R response on CA: {{r_ca_response}}</div>
+          <!-- Show the contents -->
+          {% if r_ca_contents %}
+            <div class="row">
+              <h4>CA distance table:</h4>
+              <table>
+                <thead>
+                  <tr> {% for colheading in r_ca_contents.dt_colnames %} <th>{{colheading}}</th> {% endfor %} </tr>
+                </thead>
+                <tbody>
+                  {% for row in r_ca_contents.dt_fulltable %}
+                  {% if not forloop.first %}
+                  <tr> {% for cell in row %} <td>{{cell}}</td> {% endfor %} </tr>
+                  {% endif %}
                   {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in r_contents.fulltable %}
-                {% if not forloop.first %}
-                <tr>
-                  {% for cell in row %}
-                    <td>{{cell}}</td>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="row">
+              <h4>CA list of edges:</h4>
+              <table>
+                <thead>
+                  <tr><th>Type</th><th>Weight</th><th>Target</th><th>Source</th></tr>
+                </thead>
+                <tbody>
+                  {% for row in r_ca_contents.loe_table %}
+                  <tr><td>{{row.Type}}</td><td align="center">{{row.Weight}}</td><td>{{row.Target}}</td><td>{{row.Source}}</td></tr>
                   {% endfor %}
-                </tr>
-                {% endif %}
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+            </div>
+
+            <div id="svgca">
+              {{r_ca_contents.svg|safe}}
+            </div>
+          {% endif %}
         {% endif %}
+
+
 
         <!-- Make room for an SVG plot-->
         <div id="svgplot">
           <!-- This is where the SVG will appear -->
+
         </div>
       {% endif %}
 
