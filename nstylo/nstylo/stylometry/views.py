@@ -590,7 +590,14 @@ class NlabTableDetail(APIView):
 
                 self.oErr.Status("NlabTableDetail - POST 4")
                 # Now perform the requested R-actions on the table data
-                oResponse = get_r_pca_reply(instance.table)
+                if instance.method == "pca":
+                    # Perform Principle Component Analysis
+                    oResponse = get_r_pca_reply(instance.table)
+                elif instance.method == "ca":
+                    # Perform Cluster Analysis
+                    oResponse = get_r_cluster_reply(instance.table)
+                else:
+                    oResponse = {'status': 'error', 'msg': 'unknown analysis method'}
                 # OLD:oResponse = get_r_reply(json.loads(instance.table), "analyze")
                 if oResponse['status'] == 'ok':
 

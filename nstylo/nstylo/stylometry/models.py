@@ -3,6 +3,7 @@ from rest_framework import serializers
 import json
 
 MAX_USERNAME = 1000
+MAX_NAME = 100
 
 class FreqTable(models.Model):
 
@@ -10,6 +11,8 @@ class FreqTable(models.Model):
     table = models.TextField()
     # [0-1] THe table owner (derived from the request; may be empty to facilitate migrations)
     owner = models.CharField("User name", default="anonymous", max_length=MAX_USERNAME)
+    # [1] The method (abbreviation code) that is being used
+    method = models.CharField("Analysis method", default="pca", max_length=MAX_NAME)
     # [0-1] PCA information
     pca = models.TextField(blank=True, null=True)
     # [0-1] CA (cluster analysis) information
@@ -50,5 +53,5 @@ class FreqTableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FreqTable
-        fields = ("id", "table", "owner")
+        fields = ("id", "table", "owner", "method")
 
