@@ -460,3 +460,11 @@ div.explanation {
 div.up {
   margin-top: -10px !important;
 }
+
+th.vertical > div {
+ transform: rotate(-90deg);
+ -webkit-transform: rotate(-90deg); /* Safari/Chrome */
+ -moz-transform: rotate(-90deg); /* Firefox */
+ -o-transform: rotate(-90deg); /* Opera */
+ -ms-transform: rotate(-90deg); /* IE 9 */
+}

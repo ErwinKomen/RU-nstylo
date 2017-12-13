@@ -133,6 +133,9 @@ rFuncStr = """
         # The distance table provides the distances between each two author/text combinations
         dt <- result$distance.table
 
+        # Perform my own cluster algorithm to get the tree-information
+        clres <- hclust(as.dist(dt), method="ward.D")
+
         # The 'list of edges' contains all the information needed to create a dendrogram
         loe <- result$list.of.edges
 
@@ -143,6 +146,10 @@ rFuncStr = """
                  loe_table=loe, 
                  loe_rownames=row.names(loe), 
                  loe_colnames=names(as.data.frame(loe)),
+                 cl_labels=clres$labels,
+                 cl_order=clres$order,
+                 cl_merge=clres$merge,
+                 cl_height=clres$height,
                  svg=svg
                  )
         return (jsonlite::toJSON(oBack))
