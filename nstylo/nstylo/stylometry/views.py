@@ -410,6 +410,17 @@ def get_r_cluster_reply(sTable):
 
         nCols = len(oResult[prefixes[0]+'colnames'])
 
+        # Adapt the cl_merge table to include the 'height' and 'label'
+        lMerge = oResult['cl_merge']
+        lHeight = oResult['cl_height']
+        lLabels = oResult['cl_labels']
+        for idx in range(0,len(lMerge)):
+            oMerge = lMerge[idx]
+            oMerge.append( lHeight[idx])
+            oMerge.append( lLabels[idx])
+            lMerge[idx] = oMerge
+        oResult['cl_merge'] = lMerge
+
         oBack['contents'] = oResult
         oBack['response'] = "get_r_cluster_reply: I have cluster information of {} items".format(nCols)
         # Return what we made
