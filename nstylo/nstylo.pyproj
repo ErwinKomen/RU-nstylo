@@ -102,6 +102,7 @@
     <Content Include="nstylo\stylometry\static\stylometry\scripts\prototype.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.js" />
     <Content Include="nstylo\stylometry\static\stylometry\scripts\respond.min.js" />
+    <Content Include="nstylo\stylometry\static\stylometry\scripts\stylometry.js" />
     <Content Include="nstylo\stylometry\templates\stylometry\freqtable_detail.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\freqtable_list.html" />
     <Content Include="nstylo\stylometry\templates\stylometry\info.html" />
