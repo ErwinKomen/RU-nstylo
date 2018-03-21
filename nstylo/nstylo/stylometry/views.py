@@ -24,6 +24,7 @@ from datetime import datetime
 from time import sleep
 import random, os
 import pyRserve
+from pyRserve import TaggedList
 import json
 
 # REST framework

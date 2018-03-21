@@ -37,7 +37,7 @@ def get_information(sType):
             oBack['status'] = 'error'
             return oBack
 
-        params = {'table': json.dumps(oFreqs), 'owner': 'erwin'}
+        params = {'table': json.dumps(oFreqs), 'owner': 'nstylotest'}
         oResult = make_rest_request(url,params)
         if oResult == None:
             oBack['status'] = 'error'
