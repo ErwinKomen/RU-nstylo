@@ -80,32 +80,38 @@ rFuncStr = """
       return(df_table)
     }
 
-    pca <- function(oTable) {
-        # Run stylo on [oTable]
-        result <- stylo(frequencies=oTable, analysis.type="PCR", gui=FALSE)
-        # Assuming there are results: return the PCA coordinates
-        return (result$pca.coordinates)
-    }
-    
     pca2 <- function(sTable) {
 
         # Convert input
         oTable <- jsonObjectToTable(sTable)
 
         # Run stylo on the transformed versino of [oTable]
-        result <- stylo(frequencies=t(oTable), analysis.type="PCR", gui=FALSE, 
+        result <- tryCatch( {
+            stylo(frequencies=t(oTable), analysis.type="PCR", gui=FALSE, 
                         write.png.file = TRUE, write.svg.file = TRUE,
                         custom.graph.filename="cesar_pca")
+            }, error = function(err) {
+                print(paste("nstylo.pca2 error: [", err, "]"))
+                f <- list(status='error', msg=paste(err))
+                return (f)
+            })
+
         # Note: the resulting PNG is written in a file cesar_pca_nnn.png
         #       where "nnn" is a consecutive number
         # Directory: see getwd()
 
         # Assuming there are results: return the PCA coordinates
 
-        oBack <- list(
-                 table=result$pca.coordinates, 
-                 rownames=row.names(result$pca.coordinates), 
-                 colnames=names(as.data.frame(result$pca.coordinates)))
+        if ("status" %in% names(result)) {
+            print(paste("checkpoint #2"))
+            oBack <- result
+        } else {
+            oBack <- list(
+                        table=result$pca.coordinates, 
+                        rownames=row.names(result$pca.coordinates), 
+                        colnames=names(as.data.frame(result$pca.coordinates)))
+        }
+        
         return (jsonlite::toJSON(oBack))
     }
 
@@ -115,44 +121,56 @@ rFuncStr = """
         oTable <- jsonObjectToTable(sTable)
 
         # Run stylo on the transformed versino of [oTable]
-        result <- stylo(frequencies=t(oTable), analysis.type="CA", gui=FALSE, 
+        result <- tryCatch( {
+            stylo(frequencies=t(oTable), analysis.type="CA", gui=FALSE, 
                         write.png.file = TRUE, write.svg.file = TRUE,
                         custom.graph.filename="cesar_ca")
+            }, error = function(err) {
+                print(paste("nstylo.clusterAnalysis error: [", err, "]"))
+                f <- list(status='error', msg=paste(err))
+                return (f)
+            })
+
         # Note: the resulting PNG is written in a file cesar_ca_nnn.png
         #       where "nnn" is a consecutive number
         # Directory: see getwd()
 
-        # Get the SVG file that has been made
-        files <- list.files(pattern="cesar_ca.*svg")
-        file <- files[1]
-        content <- readLines(file)
-        svg <- content[2:length(content)]
+        if ("status" %in% names(result)) {
+            print(paste("checkpoint #3"))
+            oBack <- result
+        } else {
+            # Get the SVG file that has been made
+            files <- list.files(pattern="cesar_ca.*svg")
+            file <- files[1]
+            content <- readLines(file)
+            svg <- content[2:length(content)]
 
-        # Assuming there are results: return the CA information
-        # Note: we want numerical results to draw the DENDROGRAM ourselves
+            # Assuming there are results: return the CA information
+            # Note: we want numerical results to draw the DENDROGRAM ourselves
         
-        # The distance table provides the distances between each two author/text combinations
-        dt <- result$distance.table
+            # The distance table provides the distances between each two author/text combinations
+            dt <- result$distance.table
 
-        # Perform my own cluster algorithm to get the tree-information
-        clres <- hclust(as.dist(dt), method="ward.D")
+            # Perform my own cluster algorithm to get the tree-information
+            clres <- hclust(as.dist(dt), method="ward.D")
 
-        # The 'list of edges' contains all the information needed to create a dendrogram
-        loe <- result$list.of.edges
+            # The 'list of edges' contains all the information needed to create a dendrogram
+            loe <- result$list.of.edges
 
-        oBack <- list(
-                 dt_table=dt, 
-                 dt_rownames=row.names(dt), 
-                 dt_colnames=names(as.data.frame(dt)),
-                 loe_table=loe, 
-                 loe_rownames=row.names(loe), 
-                 loe_colnames=names(as.data.frame(loe)),
-                 cl_labels=clres$labels,
-                 cl_order=clres$order,
-                 cl_merge=clres$merge,
-                 cl_height=clres$height,
-                 svg=svg
-                 )
+            oBack <- list(
+                     dt_table=dt, 
+                     dt_rownames=row.names(dt), 
+                     dt_colnames=names(as.data.frame(dt)),
+                     loe_table=loe, 
+                     loe_rownames=row.names(loe), 
+                     loe_colnames=names(as.data.frame(loe)),
+                     cl_labels=clres$labels,
+                     cl_order=clres$order,
+                     cl_merge=clres$merge,
+                     cl_height=clres$height,
+                     svg=svg
+                     )
+        }
         return (jsonlite::toJSON(oBack))
     }
 
@@ -333,13 +351,19 @@ def get_r_pca_reply(sTable):
         # Let 'R' convert the table into a data frame
         connThis.r.dfTable = connThis.r.jsonObjectToTable(sTable)
 
-        # Let R perform principle component analysis on dfTable
-        # y = connThis.r.pca(connThis.ref.dfTable)
-        # NOTE: somehow this does not work. WHY??
-
         # Let R perform 'stylo' PCR directly on [sTable]
         spcaResult = connThis.r.pca2(sTable)
         pcaResult = json.loads(spcaResult[0])
+
+        # Check the result for R-errors
+        if 'status' in pcaResult and len(pcaResult['status'])>0 and pcaResult['status'][0] == "error":
+            # There is an error, so pass it on to the caller
+            oBack['status'] = 'error'
+            if 'msg' in pcaResult and len(pcaResult['msg'])>0:
+                oBack['response'] = pcaResult['msg'][0]
+            else:
+                oBack['response'] = json.dumps(pcaResult['msg'])
+            return oBack
 
         # Adapt the resulting table with the information in object pcaResult
         lTable = []
@@ -390,6 +414,16 @@ def get_r_cluster_reply(sTable):
         sResult = connThis.r.clusterAnalysis(sTable)
         oResult = json.loads(sResult[0])
 
+        # Check the result for R-errors
+        if 'status' in oResult and len(oResult['status'])>0 and oResult['status'][0] == "error":
+            # There is an error, so pass it on to the caller
+            oBack['status'] = 'error'
+            if 'msg' in pcaResult and len(oResult['msg'])>0:
+                oBack['response'] = oResult['msg'][0]
+            else:
+                oBack['response'] = json.dumps(oResult['msg'])
+            return oBack
+
         # The results contain a dt and loe table with their row and column names
 
         # Adapt the resulting table with the information in object oResult
@@ -432,81 +466,6 @@ def get_r_cluster_reply(sTable):
         oBack['response'] = msg
         return oBack
     
-
-#@method_decorator(csrf_exempt, name='dispatch')
-#class NlabService(View):
-#    # Initialisations
-#    arErr = []              # Array of errors
-#    oErr = ErrHandle()
-#    step = "0" 
-
-#    data = {'status': 'ok', 'html': 'nlabservice is aan het werk'}       # Create data to be returned    
-
-#    def post(self, request):
-#        """ The POST option should be used mostly"""
-
-#        try:
-#            # A POST request is the only possible way to access our NLAB services
-#            self.oErr.Status("NlabService - POST 1")
-#            params = request.POST
-#            self.oErr.Status("NlabService - POST 2")
-#            sList = params.get('nstylo-freqlist')
-#            self.oErr.Status("NlabService - POST 3")
-#            if sList == "" or sList == None:
-#                list = {}
-#                self.oErr.Status("NlabService - POST: nstylo-freqlist is empty")
-#            else:
-#                list = json.loads(sList)
-
-#            self.oErr.Status("NlabService - POST 4")
-#            # Process the data in the LIST
-#            self.data['html'] = self.process_data(list)
-#            self.oErr.Status("NlabService - POST 5\n{}".format(self.data['html']))
-#        except:
-#            self.data['html'] = "an error has occurred in NlabService(View) at step {}: {}".format(self.step, self.oErr.get_error())
-
-#        # Figure out what we are going to return
-#        back = json.dumps(self.data)
-#        self.oErr.Status("NlabService - POST 6")
-
-#        # return JsonResponse(self.data)
-#        return HttpResponse(back, "application/json")
-
-#    def get(self, request):
-#        """The GET option is used in some instances"""
-
-#        self.oErr.Status("NlabService - GET")
-#        query = request.GET
-#        sList = query.get('nstylo-freqlist')
-#        if sList == "":
-#            list = {}
-#        else:
-#            list = json.loads(sList)
-
-#        # Process the data in the LIST
-#        self.data['html'] = self.process_data(list)
-
-#        # Figure out what we are going to return
-#        datadump = json.dumps(self.data)
-#        if 'callback' in query:
-#            callback = query.get('callback')
-#            back = "{}({})".format(callback, datadump)
-#        else:
-#            back = datadump
-#        return HttpResponse(back, "application/json")
-
-#    def process_data(self, list):
-#        return "The data is not processed"
-
-
-#class NlabTest(NlabService):
-    
-#    def process_data(self, list):
-#        oBack = get_r_reply(list, "analyze")
-#        if oBack['status'] == 'ok':
-#            return oBack['response']
-#        else:
-#            return ""
 
 
 class NlabInfo(View):
