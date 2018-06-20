@@ -28,10 +28,8 @@ class ErrHandle:
         # Append the error message to the stack we have
         self.loc_errStack.append(msg)
         # Print the error message for the user
-        print("Error: "+msg+"\nSystem:", file=sys.stderr)
-        for nErr in sys.exc_info():
-            if (nErr != None):
-                print(str(nErr), file=sys.stderr)
+        sTrace = self.get_error_message()
+        print("Error: "+msg+"\nTracing: "+sTrace, file=sys.stderr)
         # Is this a fatal error that requires exiting?
         if (bExit):
             sys.exit(2)
@@ -42,4 +40,15 @@ class ErrHandle:
             if (nErr != None):
                 lBack.append(str(nErr))
         return json.dumps(lBack)
+
+    def get_error_message(self):
+        arInfo = sys.exc_info()
+        if len(arInfo) == 3:
+            sMsg = str(arInfo[1])
+            if arInfo[2] != None:
+                sMsg += " at line " + str(arInfo[2].tb_lineno)
+            return sMsg
+        else:
+            return ""
+
 
