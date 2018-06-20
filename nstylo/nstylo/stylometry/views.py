@@ -418,7 +418,7 @@ def get_r_cluster_reply(sTable):
         if 'status' in oResult and len(oResult['status'])>0 and oResult['status'][0] == "error":
             # There is an error, so pass it on to the caller
             oBack['status'] = 'error'
-            if 'msg' in pcaResult and len(oResult['msg'])>0:
+            if 'msg' in sResult and len(oResult['msg'])>0:
                 oBack['response'] = oResult['msg'][0]
             else:
                 oBack['response'] = json.dumps(oResult['msg'])
